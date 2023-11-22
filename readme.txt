@@ -1,6 +1,7 @@
 1、通过main跳转到其他窗口，如music、video、pdf
 2、手势识别目前只能传递图像，需要先实现基本功能，后续通过手势检测结果调用基本功能
 3、上传文件必须是英文路径
+4、图标库参考https://www.iconfont.cn/collections/detail?spm=a313x.user_detail.i1.dc64b3430.545b3a81pe21aV&cid=35162
 
 
 (HCI_env) PS D:\2023yan\课程\人机交互\大作业\ui> conda list
