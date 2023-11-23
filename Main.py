@@ -1,3 +1,4 @@
+import shutil
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -70,9 +71,15 @@ class App(QMainWindow):
         self.pdf_btn.clicked.connect(self.toPdf)
  
     def toMusic(self):
-        mp3filepath = self.uploadFile("mp3")
-        if mp3filepath:
-            self.music_window = Music.MusicWindow(mp3filepath)
+        mp3dict = read_txt_file("./list/mp3.txt")
+        if os.path.getsize("list/mp3.txt") == 0:
+            mp3filepath = self.uploadMp3File("mp3")
+            if mp3filepath:
+                self.music_window = Music.MusicWindow(mp3filepath)
+                self.music_window.show()
+                self.close()
+        else:
+            self.music_window = Music.MusicWindow()
             self.music_window.show()
             self.close()
     
@@ -98,6 +105,25 @@ class App(QMainWindow):
             if os.path.exists(filepath):
                 os.remove(filepath)
             os.rename(fname, filepath)
+            return filepath
+        return None
+    
+    def uploadMp3File(self, type="mp3"):
+        fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
+        num = str(getMaxMp3Num())
+        if fname:
+            # 获取文件名
+            filename = os.path.basename(fname)
+            if not os.path.exists(f'{type}'):
+                os.makedirs(f'{type}')
+            # 将文件移动到mp3文件夹下
+            filepath = os.path.join(f'{type}', f"{num}.mp3")
+            mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
+            if mp3Exist:
+                return os.path.join(f'{type}', f"{mp3Index}.mp3")
+            shutil.copy(fname, filepath)
+            append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
+            addMaxMp3Num()
             return filepath
         return None
  

@@ -1,3 +1,4 @@
+import shutil
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -21,7 +22,7 @@ class MusicWindow(QMainWindow):
     def camera_UI(self):
         self.camera_label = QLabel()
         self.camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.main_layout.addWidget(self.camera_label, 5, 12, 4, 4)
+        self.main_layout.addWidget(self.camera_label, 10, 24, 8, 8)
         self.camera_input = CameraInput()
         self.camera_input.stop_flag = False
         self.camera_input.start()
@@ -46,9 +47,9 @@ class MusicWindow(QMainWindow):
         # 设置一个主窗口布局--我比较喜欢网格布局
         self.main_layout = QGridLayout()
         # 创建一个9*16的网格布局(用于定位，后期会删除)
-        for i in range(9):
+        for i in range(18):
             self.main_layout.setRowMinimumHeight(i, 100)
-            for j in range(16):
+            for j in range(32):
                 self.main_layout.addWidget(QLabel(f"({i},{j})"), i, j) # 不显示坐标，只添加空的QLabel
                 if i == 0:
                     self.main_layout.setColumnMinimumWidth(j, 100)
@@ -61,8 +62,8 @@ class MusicWindow(QMainWindow):
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.main_btn = new_button('./images/home.svg', 100, 100, '首页')
         # 定位
-        self.main_layout.addWidget(self.main_btn, 0, 12, 2, 2)
-        self.main_layout.addWidget(self.help_btn, 0, 14, 2, 2)
+        self.main_layout.addWidget(self.main_btn, 0, 25, 4, 4)
+        self.main_layout.addWidget(self.help_btn, 0, 29, 4, 4)
         # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.main_btn.clicked.connect(self.toMain)
@@ -79,23 +80,24 @@ class MusicWindow(QMainWindow):
         # 创建一个变量，用于记录当前播放的音乐索引
         self.current_index = 0
 
-        self.cd = QLabel()
-        self.cd_icon = QPixmap("./images/cd.svg").scaled(QSize(500,500))
-        # 创建一个变换对象，用于旋转唱片
-        transform = QTransform()
-        # 以唱片的中心为原点，顺时针旋转指定的角度
-        transform.translate(100, 100).rotate(360).translate(-100, -100)
-        self.cd.setPixmap(self.cd_icon.transformed(transform))
-        self.cd.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.main_layout.addWidget(self.cd, 1, 1, 7, 7)
-        # 创建一个变量，用于记录唱片的旋转角度
-        self.angle = 0
+        # self.cd = QLabel()
+        # self.cd_icon = QPixmap("./images/cd.svg").scaled(QSize(500,500))
+        # # 创建一个变换对象，用于旋转唱片
+        # transform = QTransform()
+        # # 以唱片的中心为原点，顺时针旋转指定的角度
+        # transform.translate(100, 100).rotate(360).translate(-100, -100)
+        # self.cd.setPixmap(self.cd_icon.transformed(transform))
+        # self.cd.setAttribute(Qt.WA_TranslucentBackground, True)
+        # self.main_layout.addWidget(self.cd, 1, 1, 7, 7)
+        # # 创建一个变量，用于记录唱片的旋转角度
+        # self.angle = 0
         
         self.play_btn = new_button('images/play.svg', 100, 100, '播放')
         self.prev_btn = new_button('images/prev.svg', 100, 100, '上一首')
         self.next_btn = new_button('images/next.svg', 100, 100, '下一首')
         self.volume_btn = new_button('images/voice.svg', 100, 100, '音量')
         self.refresh_btn = new_button('images/refresh.svg', 100, 100, '刷新')
+        self.upmp3_btn = new_button('images/upload.svg', 100, 100, '上传')
         
         self.slider = QSlider(Qt.Horizontal, self)
         # 设置滑动条的最小值和最大值
@@ -120,16 +122,19 @@ class MusicWindow(QMainWindow):
         self.slider_layout = QVBoxLayout()
         self.volume_slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        self.main_layout.addWidget(self.volume_slider, 5, 9, 3, 1)
+        self.main_layout.addWidget(self.volume_slider, 10, 18, 6, 2)
         self.slider_layout.setAlignment(Qt.AlignCenter)
-
         
-        self.main_layout.addWidget(self.prev_btn, 8, 1, 2, 1)
-        self.main_layout.addWidget(self.play_btn, 8, 3, 2, 1)
-        self.main_layout.addWidget(self.next_btn, 8, 5, 2, 1)
-        self.main_layout.addWidget(self.refresh_btn, 8, 7, 2, 1)
-        self.main_layout.addWidget(self.volume_btn, 8, 9, 2, 1)
-        self.main_layout.addWidget(self.slider, 0, 1, 1, 10)
+        spacer_left = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        spacer_right = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.main_layout.addWidget(self.prev_btn, 16, 1, 4, 2)
+        self.main_layout.addWidget(self.play_btn, 16, 5, 4, 2)
+        self.main_layout.addWidget(self.next_btn, 16, 9, 4, 2)
+        self.main_layout.addWidget(self.refresh_btn, 16, 13, 4, 2)
+        self.main_layout.addWidget(self.volume_btn, 16, 17, 4, 2)
+        self.main_layout.addWidget(self.upmp3_btn, 16, 21, 4, 2)
+        self.main_layout.addWidget(self.slider, 0, 2, 2, 20)
         
         # 调用初始化音乐列表的方法
         self.init_music_list()
@@ -148,20 +153,24 @@ class MusicWindow(QMainWindow):
         
     # 初始化音乐列表的方法
     def init_music_list(self):
-        # 获取music文件夹下的所有文件
-        files = os.listdir('./mp3')
-        # 遍历所有文件
-        for file in files:
-            # 如果文件是mp3格式的音乐文件，就把它的路径添加到音乐列表中
-            if file.endswith('.mp3'):
-                self.music_list.append(os.path.join('./mp3', file))
-        # 如果音乐列表不为空，就随机选择一个音乐文件作为当前播放的音乐
+        self.music_list = read_txt_file("./list/mp3.txt")
+        self.keys_list = list(self.music_list.keys())
+        self.value_list = list(self.music_list.values())
+        self.current_index = 0
         if self.music_list:
             if self.mp3filepath:
                 self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.mp3filepath)))
             else:
-                self.current_index = random.randint(0, len(self.music_list) - 1)
-                self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.music_list[self.current_index])))
+                self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
+        self.list_label = QLabel()
+        self.main_layout.addWidget(self.list_label, 2, 0, 14, 24)
+        self.button_scroll = ButtonScroll(self.value_list, self)
+        self.list_label.setLayout(self.button_scroll.layout())
+    
+	# 跳转到指定歌曲
+    def jump(self):
+        print("yes")
+        
     
     # 连接信号和槽的方法
     def connect_slots(self):
@@ -184,9 +193,10 @@ class MusicWindow(QMainWindow):
         # 连接媒体播放器的媒体状态改变信号和检查是否播放完毕的槽函数
         self.music_player.mediaStatusChanged.connect(self.check_end)
         # 连接定时器的超时信号和更新唱片旋转角度的槽函数
-        self.music_timer.timeout.connect(self.update_angle)
+        # self.music_timer.timeout.connect(self.update_angle)
         # 连接刷新按钮的点击信号和刷新音乐的槽函数
         self.refresh_btn.clicked.connect(self.refresh_music)
+        self.upmp3_btn.clicked.connect(self.uploadMp3File)
         # 连接上传按钮的点击信号和上传背景图片的槽函数
         # self.upload_btn.clicked.connect(self.upload_background)
         # 连接HandDetector对象的timer对象的timeout信号和一个自定义的槽函数，用于在每次获取摄像头的图像时，判断手势并控制音乐播放器的播放
@@ -322,6 +332,26 @@ class MusicWindow(QMainWindow):
             self.background.setWindowOpacity(0.1)
             # 将用户选择的图片保存到images/background文件夹下，文件名为background.svg
             self.background.pixmap().toImage().save('images/background/background.svg')
+    
+    def uploadMp3File(self):
+        type="mp3"
+        fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
+        num = str(getMaxMp3Num())
+        if fname:
+            # 获取文件名
+            filename = os.path.basename(fname)
+            if not os.path.exists(f'{type}'):
+                os.makedirs(f'{type}')
+            # 将文件移动到mp3文件夹下
+            filepath = os.path.join(f'{type}', f"{num}.mp3")
+            mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
+            if mp3Exist:
+                return os.path.join(f'{type}', f"{mp3Index}.mp3")
+            shutil.copy(fname, filepath)
+            append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
+            addMaxMp3Num()
+            return filepath
+        return None
             
     def set_qss(self):
         self.slider.setStyleSheet("""

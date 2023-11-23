@@ -3,7 +3,15 @@
 3、上传文件必须是英文路径
 4、图标库参考https://www.iconfont.cn/collections/detail?spm=a313x.user_detail.i1.dc64b3430.545b3a81pe21aV&cid=35162
 
+Gesture.py、Main.py是公有的
 
+Main.py中，定义了toVideo、toPdf的页面跳转办法，只需要修改这两个方法，相应界面可以在这个里面调用上传文件的办法，参考toMusic函数的写法，不过toMusic的逻辑是复制上传的音乐到项目的mp3文件夹下，video和pdf可以考虑不做复制，直接按照路径打开用户选择的文件，注意处理中文路径的问题
+
+Method.py是与界面关系不大的方法，可以提取出来，为了减少冲突，你们的此类方法可以新建VideoMethod.py和PdfMethod.py存放
+
+创建图标按钮时，可以参考Method.py的new_button的方法，保持ui的一致性
+
+python3.8.18
 (HCI_env) PS D:\2023yan\课程\人机交互\大作业\ui> conda list
 # packages in environment at D:\python\anaconda\envs\HCI_env:
 #
