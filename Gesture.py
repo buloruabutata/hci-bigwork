@@ -11,6 +11,7 @@ class CameraInput(QThread):
     DEVICE_NUM = 0
     frame_ready = pyqtSignal(np.ndarray)
     stop_flag = False
+    gesture_result = None
     def __init__(self):
         super().__init__()
         self.DEVICE_NUM = 0
@@ -21,16 +22,68 @@ class CameraInput(QThread):
         #计算向量的L2范数
         dist1 = np.linalg.norm((point2 - point1), ord=2)
         dist2 = np.linalg.norm((point3 - point1), ord=2)
-        if dist2 > dist1:
+        if dist2 > dist1 or (dist2 > dist1 and point2[1] < point3[1]):
             result = 1
         return result
+    # def finger_stretch_detect(self, point1, point2, point3):
+    #     result = 0
+    #     #计算向量的L2范数
+    #     dist1 = np.linalg.norm((point2 - point1), ord=2)
+    #     dist2 = np.linalg.norm((point3 - point1), ord=2)
+    #     if dist2 > dist1 or point2[1] < point3[1]:
+    #         result = 1
+    #     return result
         
     # 检测手势
-    def detect_hands_gesture(self, result):
+    # def gesture_signal(self, landmarks):
+    #     thumb_tip = landmarks[4]
+    #     thumb_base = landmarks[2]
+    #     if thumb_tip[1] < thumb_base[1]:
+    #         return "up"
+    #     elif thumb_tip[1] > thumb_base[1]:
+    #         return "down"
+    #     elif thumb_tip[0] < thumb_base[0]:
+    #         return "left"
+    #     else:
+    #         return "right"
+    def gesture_signal(self, landmarks):
+        thumb_tip = landmarks[4]
+        thumb_base = landmarks[2]
+        wrist = landmarks[0]
+        
+        if thumb_tip[1] < thumb_base[1]:
+            return "up"
+        elif thumb_tip[1] > thumb_base[1]:
+            return "down"
+        elif thumb_tip[0] < wrist[0]:
+            return "left"
+        else:
+            return "right"
+    
+    def gesture_signal_left_and_right(self, landmarks):
+        thumb_tip = landmarks[4]
+        thumb_base = landmarks[2]
+        
+        if thumb_tip[0] < thumb_base[0]:
+            return "right"
+        else:
+            return "left"
+        
+    def gesture_signal_up_and_down(self, landmarks):
+        index_tip = landmarks[8]
+        index_base = landmarks[6]
+        
+        if index_tip[1] < index_base[1]:
+            return "up"
+        else:
+            return "down"
+
+
+    def detect_hands_gesture(self, result, landmark):
         if (result[0] == 1) and (result[1] == 0) and (result[2] == 0) and (result[3] == 0) and (result[4] == 0):
-            gesture = "good"
+            gesture = self.gesture_signal_left_and_right(landmark)
         elif (result[0] == 0) and (result[1] == 1)and (result[2] == 0) and (result[3] == 0) and (result[4] == 0):
-            gesture = "one"
+            gesture = self.gesture_signal_up_and_down(landmark)
         elif (result[0] == 0) and (result[1] == 0)and (result[2] == 1) and (result[3] == 0) and (result[4] == 0):
             gesture = "please civilization in testing"
         elif (result[0] == 0) and (result[1] == 1)and (result[2] == 1) and (result[3] == 0) and (result[4] == 0):
@@ -113,8 +166,8 @@ class CameraInput(QThread):
                         figure[k] = figure_
                     # print(figure,'\n')
     
-                    gesture_result = self.detect_hands_gesture(figure)
-                    cv.putText(frame, f"{gesture_result}", (30, 45 * i + 90), cv.FONT_HERSHEY_COMPLEX, 1.5, (255 ,255, 0), 5)
+                    self.gesture_result = self.detect_hands_gesture(figure, landmark)
+                    cv.putText(frame, f"{self.gesture_result}", (30, 45 * i + 90), cv.FONT_HERSHEY_COMPLEX, 1.5, (255 ,255, 0), 5)
 
             # cv.imshow('frame', frame)
             # 发出一个信号，传递视频帧，用emit方法
