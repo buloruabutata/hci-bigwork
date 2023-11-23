@@ -50,6 +50,12 @@ def search_song_in_file(file_path, song_name):
             return True, lines[i]
     return False, None
 
+def index_of(val, in_list):
+    try:
+        return in_list.index(val)
+    except ValueError:
+        return -1
+
 class ScrollingButton(QPushButton):
     def __init__(self, text, parent=None):
         super(ScrollingButton, self).__init__(text, parent)
@@ -80,6 +86,9 @@ class ScrollingButton(QPushButton):
             if not self.timer.isActive():
                 self.setStyleSheet('QPushButton {min-height: 50px; border: none;}')
         return super().eventFilter(obj, event)
+    
+    def text_change(self):
+        return self.original_text[4:-4]
 
 class ButtonScroll(QWidget):
     def __init__(self, button_texts, parent):
@@ -94,7 +103,7 @@ class ButtonScroll(QWidget):
         self.setGeometry(100, 100, 300, 400)
 
         # Create a vertical layout
-        layout = QVBoxLayout()
+        self.vlayout = QVBoxLayout()
 
         # Create buttons and add them to the layout
         self.buttons = []
@@ -102,14 +111,14 @@ class ButtonScroll(QWidget):
             button = ScrollingButton(text, self)
             # button.setStyleSheet('QPushButton {min-height: 50px; border: none;}')
             button.clicked.connect(self.start_stop_scrolling)  # Connect the button's clicked signal to a new slot
-            layout.addWidget(button)
+            self.vlayout.addWidget(button)
             self.buttons.append(button)
 
         # Create a scroll area and set the layout
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.vlayout)
         scroll_area.setWidget(widget)
 
         # Add the scroll area to the main layout
@@ -118,13 +127,32 @@ class ButtonScroll(QWidget):
         self.setLayout(main_layout)
         
         self.cur = None
+    
+    def add_button(self, text):
+        button = ScrollingButton(text, self)
+        button.clicked.connect(self.start_stop_scrolling)  # Connect the button's clicked signal to a new slot
+        self.vlayout.addWidget(button)
+        self.buttons.append(button)
         
     def start_stop_scrolling(self):
         button = self.sender()
-        self.parent.jump()
+        self.parent.jump(button.text_change())
         if self.current_scrolling_button is not None and self.current_scrolling_button != button:
             self.current_scrolling_button.start_stop_scrolling()
         self.current_scrolling_button = button if self.current_scrolling_button != button else None
+    
+    def scrolling_by_outside(self, index):
+        button = self.buttons[index]
+        if self.current_scrolling_button is not None and self.current_scrolling_button != button:
+            self.current_scrolling_button.start_stop_scrolling()
+        self.current_scrolling_button = button
+        self.current_scrolling_button.start_stop_scrolling()
+        
+    # def scrolling_by_outside_click(self, index):
+    #     button = self.buttons[index]
+    #     if self.current_scrolling_button is not None and self.current_scrolling_button != button:
+    #         self.current_scrolling_button.start_stop_scrolling()
+    #     self.current_scrolling_button = button
 
 
 if __name__ == "__main__":

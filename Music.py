@@ -77,6 +77,8 @@ class MusicWindow(QMainWindow):
         self.music_timer = QTimer()
         # 创建一个列表，用于存储音乐文件的路径
         self.music_list = []
+        # 存放音乐名字
+        self.name_list = []
         # 创建一个变量，用于记录当前播放的音乐索引
         self.current_index = 0
 
@@ -92,7 +94,7 @@ class MusicWindow(QMainWindow):
         # # 创建一个变量，用于记录唱片的旋转角度
         # self.angle = 0
         
-        self.play_btn = new_button('images/play.svg', 100, 100, '播放')
+        self.play_btn = new_button('images/pause.svg', 100, 100, '播放')
         self.prev_btn = new_button('images/prev.svg', 100, 100, '上一首')
         self.next_btn = new_button('images/next.svg', 100, 100, '下一首')
         self.volume_btn = new_button('images/voice.svg', 100, 100, '音量')
@@ -115,18 +117,19 @@ class MusicWindow(QMainWindow):
         self.volume_slider.setValue(50)
         # 设置滑动条的可见性
         self.volume_slider.setVisible(False)
-        # self.volume_slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        # 创建一个QWidget并将self.volume_slider添加到其中
-        self.slider_widget = QWidget()
-        self.slider_layout = QVBoxLayout()
         self.volume_slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        self.main_layout.addWidget(self.volume_slider, 10, 18, 6, 2)
-        self.slider_layout.setAlignment(Qt.AlignCenter)
+        # 创建一个QWidget并将self.volume_slider添加到其中
+        # self.slider_widget = QWidget()
+        # self.slider_layout = QVBoxLayout()
+        # self.volume_slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.main_layout.addWidget(self.volume_slider, 10, 17, 6, 2)
+        # self.volume_slider.resize(200, 300)
+        # self.slider_layout.setAlignment(Qt.AlignCenter)
         
-        spacer_left = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        spacer_right = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # spacer_left = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # spacer_right = QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.main_layout.addWidget(self.prev_btn, 16, 1, 4, 2)
         self.main_layout.addWidget(self.play_btn, 16, 5, 4, 2)
@@ -141,7 +144,6 @@ class MusicWindow(QMainWindow):
         # 调用连接信号和槽的方法
         self.connect_slots()
         self.set_qss()
-
  
     def toMain(self):
         self.music_player = None
@@ -152,24 +154,60 @@ class MusicWindow(QMainWindow):
         self.close()
         
     # 初始化音乐列表的方法
+    # def init_music_list(self):
+    #     self.music_list = read_txt_file("./list/mp3.txt")
+    #     self.keys_list = list(self.music_list.keys())
+    #     self.value_list = list(self.music_list.values())
+    #     self.current_index = 0
+    #     if self.music_list:
+    #         if self.mp3filepath:
+    #             self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.mp3filepath)))
+    #         else:
+    #             self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
+    #     self.list_label = QLabel()
+    #     self.main_layout.addWidget(self.list_label, 2, 0, 14, 24)
+    #     self.button_scroll = ButtonScroll(self.value_list, self)
+    #     self.list_label.setLayout(self.button_scroll.layout())
+    #     self.volume_slider.raise_()
+        
+    # 初始化音乐列表的方法
     def init_music_list(self):
-        self.music_list = read_txt_file("./list/mp3.txt")
-        self.keys_list = list(self.music_list.keys())
-        self.value_list = list(self.music_list.values())
-        self.current_index = 0
-        if self.music_list:
-            if self.mp3filepath:
-                self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.mp3filepath)))
-            else:
-                self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
+        # 获取music文件夹下的所有文件
+        files = os.listdir('./mp3')
+        # 遍历所有文件
+        for file in files:
+            # 如果文件是mp3格式的音乐文件，就把它的路径添加到音乐列表中
+            if file.endswith('.mp3'):
+                self.name_list.append("    {}    ".format(file))
+                self.music_list.append(os.path.join('./mp3', file))
         self.list_label = QLabel()
         self.main_layout.addWidget(self.list_label, 2, 0, 14, 24)
-        self.button_scroll = ButtonScroll(self.value_list, self)
+        self.button_scroll = ButtonScroll(self.name_list, self)
         self.list_label.setLayout(self.button_scroll.layout())
+        self.volume_slider.raise_()
+        
+        self.init_music_play()
+        self.button_scroll.scrolling_by_outside(self.current_index)
     
-	# 跳转到指定歌曲
-    def jump(self):
-        print("yes")
+    def setMusic(self):
+        self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.abspath(self.music_list[self.current_index]))))
+
+    # 如果音乐列表不为空，就随机选择一个音乐文件作为当前播放的音乐
+    def init_music_play(self):
+        if self.music_list:
+            if self.mp3filepath:
+                self.current_index = index_of(self.mp3filepath, self.music_list)
+            else:
+                self.current_index = random.randint(0, len(self.music_list) - 1)
+            # self.button_scroll.scrolling_by_outside(self.current_index)
+            self.setMusic()
+            self.music_player.play()
+    
+    # 跳转到指定歌曲
+    def jump(self, filename):
+        print(os.path.join('./mp3', filename))
+        self.mp3filepath = os.path.join('./mp3', filename)
+        self.init_music_play()
         
     
     # 连接信号和槽的方法
@@ -214,20 +252,28 @@ class MusicWindow(QMainWindow):
     # 播放上一首音乐的槽函数
     def play_prev(self):
         # 如果音乐列表不为空，就计算上一首音乐的索引
+        # self.current_index = (self.current_index + len(self.keys_list) - 1) % len(self.keys_list)
+        # self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
+        # self.music_player.play()
         if self.music_list:
             self.current_index = (self.current_index - 1) % len(self.music_list)
             # 设置媒体播放器的媒体内容为上一首音乐的路径
-            self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.music_list[self.current_index])))
+            self.setMusic()
+            self.button_scroll.scrolling_by_outside(self.current_index)
             # 开始播放
             self.music_player.play()
     
     # 播放下一首音乐的槽函数
     def play_next(self):
         # 如果音乐列表不为空，就计算下一首音乐的索引
+        # self.current_index = (self.current_index + 1) % len(self.keys_list)
+        # self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
+        # self.music_player.play()
         if self.music_list:
             self.current_index = (self.current_index + 1) % len(self.music_list)
             # 设置媒体播放器的媒体内容为下一首音乐的路径
-            self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.music_list[self.current_index])))
+            self.setMusic()
+            self.button_scroll.scrolling_by_outside(self.current_index)
             # 开始播放
             self.music_player.play()
     
@@ -240,6 +286,13 @@ class MusicWindow(QMainWindow):
         else:
             self.volume_slider.setVisible(True)
             # self.volume_slider.move(self.volume_btn.x(), self.volume_btn.y() - self.volume_slider.height())
+    
+    def mousePressEvent(self, event):
+        if (event.x() < self.volume_slider.x() or
+            event.y() < self.volume_slider.y() or
+            event.x() > self.volume_slider.x() + self.volume_slider.width() or
+            event.y() > self.volume_slider.y() + self.volume_slider.height()):
+            self.volume_slider.setVisible(False)
     
     # 设置音量的槽函数
     def set_volume(self, value):
@@ -332,24 +385,34 @@ class MusicWindow(QMainWindow):
             self.background.setWindowOpacity(0.1)
             # 将用户选择的图片保存到images/background文件夹下，文件名为background.svg
             self.background.pixmap().toImage().save('images/background/background.svg')
-    
+            
     def uploadMp3File(self):
-        type="mp3"
-        fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
-        num = str(getMaxMp3Num())
+        fname, _ = QFileDialog.getOpenFileName(self, f'选择mp3文件', '', f'mp3文件 (*.mp3)')
+        # num = str(getMaxMp3Num())
         if fname:
             # 获取文件名
             filename = os.path.basename(fname)
-            if not os.path.exists(f'{type}'):
-                os.makedirs(f'{type}')
+            if not os.path.exists(f'mp3'):
+                os.makedirs(f'mp3')
             # 将文件移动到mp3文件夹下
-            filepath = os.path.join(f'{type}', f"{num}.mp3")
-            mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
-            if mp3Exist:
-                return os.path.join(f'{type}', f"{mp3Index}.mp3")
+            # filepath = os.path.join(f'mp3', f"{num}.mp3")
+            filepath = os.path.join(f'./mp3', f"{filename}")
+            # mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
+            # if mp3Exist:
+                # return os.path.join(f'mp3', f"{mp3Index}.mp3")
+            if os.path.exists(filepath):
+                return filepath
             shutil.copy(fname, filepath)
-            append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
-            addMaxMp3Num()
+            # append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
+            # addMaxMp3Num()
+
+            self.button_scroll.add_button("    {}    ".format(filename))
+            self.name_list.append("    {}    ".format(filename))
+            self.music_list.append(filepath)
+            self.mp3filepath = filepath
+            self.init_music_play()
+            
+            print(filepath)
             return filepath
         return None
             

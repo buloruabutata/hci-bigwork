@@ -71,8 +71,9 @@ class App(QMainWindow):
         self.pdf_btn.clicked.connect(self.toPdf)
  
     def toMusic(self):
-        mp3dict = read_txt_file("./list/mp3.txt")
-        if os.path.getsize("list/mp3.txt") == 0:
+        # mp3dict = read_txt_file("./list/mp3.txt")
+        # if os.path.getsize("list/mp3.txt") == 0:
+        if len(os.listdir("./mp3")) == 0:
             mp3filepath = self.uploadMp3File("mp3")
             if mp3filepath:
                 self.music_window = Music.MusicWindow(mp3filepath)
@@ -110,23 +111,26 @@ class App(QMainWindow):
     
     def uploadMp3File(self, type="mp3"):
         fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
-        num = str(getMaxMp3Num())
+        # num = str(getMaxMp3Num())
         if fname:
             # 获取文件名
             filename = os.path.basename(fname)
             if not os.path.exists(f'{type}'):
                 os.makedirs(f'{type}')
             # 将文件移动到mp3文件夹下
-            filepath = os.path.join(f'{type}', f"{num}.mp3")
-            mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
-            if mp3Exist:
-                return os.path.join(f'{type}', f"{mp3Index}.mp3")
+            # filepath = os.path.join(f'{type}', f"{num}.mp3")
+            filepath = os.path.join(f'./{type}', f"{filename}")
+            # mp3Exist, mp3Index = search_song_in_file("./list/mp3.txt", filename)
+            # if mp3Exist:
+                # return os.path.join(f'{type}', f"{mp3Index}.mp3")
+            if os.path.exists(filepath):
+                return filepath
             shutil.copy(fname, filepath)
-            append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
-            addMaxMp3Num()
+            # append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
+            # addMaxMp3Num()
             return filepath
         return None
- 
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     gui = App()
