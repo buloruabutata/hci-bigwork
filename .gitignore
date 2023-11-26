@@ -3,3 +3,7 @@ mp3/*
 mp4/*
 pdf/*
 test.py
+build/
+dist/
+Main.spec
+mediapipe/

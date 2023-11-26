@@ -11,6 +11,8 @@ Method.py是与界面关系不大的方法，可以提取出来，为了减少�
 
 创建图标按钮时，可以参考Method.py的new_button的方法，保持ui的一致性
 
+pyinstaller Main.py --add-data="D:\python\anaconda\envs\HCI_env\Lib\site-packages\mediapipe\modules;mediapipe/modules" -F -w
+
 python3.8.18
 (HCI_env) PS D:\2023yan\课程\人机交互\大作业\ui> conda list
 # packages in environment at D:\python\anaconda\envs\HCI_env:
