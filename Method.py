@@ -89,6 +89,10 @@ class ScrollingButton(QPushButton):
     
     def text_change(self):
         return self.original_text[4:-4]
+    
+    def set_original_text(self, text):
+        self.original_text = text
+        self.setText(self.original_text)
 
 class ButtonScroll(QWidget):
     def __init__(self, button_texts, parent):
@@ -113,26 +117,57 @@ class ButtonScroll(QWidget):
             button.clicked.connect(self.start_stop_scrolling)  # Connect the button's clicked signal to a new slot
             self.vlayout.addWidget(button)
             self.buttons.append(button)
+            spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed)
+            self.vlayout.addItem(spacer)
 
+        # Add a stretch at the end of the layout
+        self.vlayout.addStretch(1)
+        
         # Create a scroll area and set the layout
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
         widget = QWidget()
         widget.setLayout(self.vlayout)
-        scroll_area.setWidget(widget)
+        self.scroll_area.setWidget(widget)
 
         # Add the scroll area to the main layout
         main_layout = QVBoxLayout()
-        main_layout.addWidget(scroll_area)
+        main_layout.addWidget(self.scroll_area)
         self.setLayout(main_layout)
         
         self.cur = None
+        
+    def change_new_song_position(self, index): 
+        self.scrolling_by_outside(index)
+        temp = self.buttons[0].original_text
+        self.buttons[0].set_original_text(self.buttons[index].original_text)
+        self.buttons[index].set_original_text(temp)
+        self.scroll_area.verticalScrollBar().setValue(0)
+        self.scrolling_by_outside(0)
     
     def add_button(self, text):
+        # Remove the stretch
+        self.vlayout.takeAt(self.vlayout.count() - 1)
         button = ScrollingButton(text, self)
+        # temp = self.buttons[0]
         button.clicked.connect(self.start_stop_scrolling)  # Connect the button's clicked signal to a new slot
         self.vlayout.addWidget(button)
         self.buttons.append(button)
+        
+        self.change_new_song_position(len(self.buttons) - 1)
+        
+        # Add the stretch back
+        self.vlayout.addStretch(1)
+        # print(self.scroll_area.verticalScrollBar().maximum())
+        # self.scroll_area.verticalScrollBar().setValue(0)
+        # self.ensure_button_visible(-1)
+        
+    # def ensure_button_visible(self, buttonIndex):
+    #     if buttonIndex == -1:
+    #         buttonIndex = len(self.buttons) - 1
+        # self.scroll_area.ensureWidgetVisible(self.buttons[buttonIndex])
+        # self.scroll_area.verticalScrollBar().maximum()
+        # self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().maximum())
         
     def start_stop_scrolling(self):
         button = self.sender()

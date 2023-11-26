@@ -187,7 +187,8 @@ class MusicWindow(QMainWindow):
         self.volume_slider.raise_()
         
         self.init_music_play()
-        self.button_scroll.scrolling_by_outside(self.current_index)
+        if self.music_list:
+            self.button_scroll.scrolling_by_outside(self.current_index)
     
     def setMusic(self):
         self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.abspath(self.music_list[self.current_index]))))
@@ -198,7 +199,7 @@ class MusicWindow(QMainWindow):
             if self.mp3filepath:
                 self.current_index = index_of(self.mp3filepath, self.music_list)
             else:
-                self.current_index = random.randint(0, len(self.music_list) - 1)
+                self.current_index = 0
             # self.button_scroll.scrolling_by_outside(self.current_index)
             self.setMusic()
             self.music_player.play()
@@ -385,6 +386,15 @@ class MusicWindow(QMainWindow):
             self.background.setWindowOpacity(0.1)
             # 将用户选择的图片保存到images/background文件夹下，文件名为background.svg
             self.background.pixmap().toImage().save('images/background/background.svg')
+    
+    def change_new_song_position(self, index):
+        temp = self.name_list[0]
+        self.name_list[0] = self.name_list[index]
+        self.name_list[index] = temp
+        
+        temp = self.music_list[0]
+        self.music_list[0] = self.music_list[index]
+        self.music_list[index] = temp
             
     def uploadMp3File(self):
         fname, _ = QFileDialog.getOpenFileName(self, f'选择mp3文件', '', f'mp3文件 (*.mp3)')
@@ -401,6 +411,11 @@ class MusicWindow(QMainWindow):
             # if mp3Exist:
                 # return os.path.join(f'mp3', f"{mp3Index}.mp3")
             if os.path.exists(filepath):
+                index = index_of("    {}    ".format(filename), self.name_list)
+                self.button_scroll.change_new_song_position(index)
+                self.change_new_song_position(index)
+                self.mp3filepath = filepath
+                self.init_music_play()
                 return filepath
             shutil.copy(fname, filepath)
             # append_to_txt_file("./list/mp3.txt", "{}\n{}\n".format(num, filename))
@@ -410,6 +425,7 @@ class MusicWindow(QMainWindow):
             self.name_list.append("    {}    ".format(filename))
             self.music_list.append(filepath)
             self.mp3filepath = filepath
+            self.change_new_song_position(len(self.music_list) - 1)
             self.init_music_play()
             
             print(filepath)
