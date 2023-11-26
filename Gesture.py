@@ -22,6 +22,7 @@ class CameraInput(QThread):
         self.DEVICE_NUM = 0
         self.last_click_time = 0  # 上一次点击的时间
         self.move = True
+        self.move_min = 2
     # 手指检测
     # point1-手掌0点位置，point2-手指尖点位置，point3手指根部点位置
     def finger_stretch_detect(self, point1, point2, point3):
@@ -133,7 +134,7 @@ class CameraInput(QThread):
                 
     
     def do_click(self):
-        if self.gesture_result == "open" and self.move:
+        if self.gesture_result == "stone" and self.move:
             current_time = time.time()
             if current_time - self.last_click_time >= 1:  # 如果距离上一次点击已经过去了1秒
                 self.mouse.click(Button.left, 1)  # 模拟左键点击一次
@@ -141,11 +142,12 @@ class CameraInput(QThread):
                 
     def do_move(self, landmark):
         hand_pos = np.mean(landmark, axis=0)
-        if self.prev_hand_pos is not None and self.gesture_result == "stone":
+        if self.prev_hand_pos is not None and self.gesture_result == "open":
             # 计算手的移动距离和方向
             hand_movement = hand_pos - self.prev_hand_pos
             # 将手的移动应用到鼠标上
-            self.mouse.move(self.mouse_rate * hand_movement[0], (-1) * self.mouse_rate * hand_movement[1])
+            if np.linalg.norm(hand_movement) > self.move_min:
+                self.mouse.move(self.mouse_rate * hand_movement[0], (-1) * self.mouse_rate * hand_movement[1])
         # 保存这一帧的手的位置，以便在下一帧中使用
         self.prev_hand_pos = hand_pos
     

@@ -117,7 +117,7 @@ class ButtonScroll(QWidget):
             button.clicked.connect(self.start_stop_scrolling)  # Connect the button's clicked signal to a new slot
             self.vlayout.addWidget(button)
             self.buttons.append(button)
-            spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed)
+            spacer = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
             self.vlayout.addItem(spacer)
 
         # Add a stretch at the end of the layout
@@ -172,9 +172,11 @@ class ButtonScroll(QWidget):
     def start_stop_scrolling(self):
         button = self.sender()
         self.parent.jump(button.text_change())
-        if self.current_scrolling_button is not None and self.current_scrolling_button != button:
+        # if self.current_scrolling_button is not None and self.current_scrolling_button != button:
+        if self.current_scrolling_button is not None:
             self.current_scrolling_button.start_stop_scrolling()
-        self.current_scrolling_button = button if self.current_scrolling_button != button else None
+        # self.current_scrolling_button = button if self.current_scrolling_button != button else None
+        self.current_scrolling_button = button
     
     def scrolling_by_outside(self, index):
         button = self.buttons[index]
