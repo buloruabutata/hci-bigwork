@@ -256,7 +256,7 @@ class MusicWindow(QMainWindow):
         # self.current_index = (self.current_index + len(self.keys_list) - 1) % len(self.keys_list)
         # self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
         # self.music_player.play()
-        if self.music_list:
+        if len(self.music_list) > 1:
             self.current_index = (self.current_index - 1) % len(self.music_list)
             # 设置媒体播放器的媒体内容为上一首音乐的路径
             self.setMusic()
@@ -270,7 +270,7 @@ class MusicWindow(QMainWindow):
         # self.current_index = (self.current_index + 1) % len(self.keys_list)
         # self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile("./mp3/{}.mp3".format(str(self.keys_list[self.current_index])))))
         # self.music_player.play()
-        if self.music_list:
+        if len(self.music_list) > 1:
             self.current_index = (self.current_index + 1) % len(self.music_list)
             # 设置媒体播放器的媒体内容为下一首音乐的路径
             self.setMusic()
