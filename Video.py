@@ -227,7 +227,7 @@ class VideoWindow(QMainWindow):
     def set_position(self, value):
     # 如果进度滑动条被用户释放，就设置媒体播放器的播放位置为滑动条的值乘以媒体播放器的总时长除以100
         if self.slider.isSliderDown():
-            self.player.setPosition(value * self.player.duration() / 100)
+            self.player.setPosition(value * self.player.duration() / 600)
     
     # 更新进度滑动条的槽函数
     def update_slider(self, position):
@@ -280,7 +280,7 @@ class VideoWindow(QMainWindow):
     
     def set_qss(self):
         #B0E0E6
-        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowFlag(Qt.FramelessWindowHint)
         # self.setAttribute(Qt.WA_TranslucentBackground)
         self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;}""")
         # self.list_label.setStyleSheet("""QLabel {border-radius: 10px; background-color: #45c1d6;}""")
