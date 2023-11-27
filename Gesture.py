@@ -21,8 +21,11 @@ class CameraInput(QThread):
         self.mouse_rate = -5.0
         self.DEVICE_NUM = 0
         self.last_click_time = 0  # 上一次点击的时间
-        self.move = True
+        self.move = False
         self.move_min = 2
+        
+        # 避免手势切换过程中调用方法
+        self.gesture_result_change_time = time.time()
     # 手指检测
     # point1-手掌0点位置，point2-手指尖点位置，point3手指根部点位置
     def finger_stretch_detect(self, point1, point2, point3):
@@ -52,11 +55,11 @@ class CameraInput(QThread):
         elif (result[0] == 1) and (result[1] == 0)and (result[2] == 0) and (result[3] == 0) and (result[4] == 1):
             gesture = "six"
         elif (result[0] == 0) and (result[1] == 0)and (result[2] == 1) and (result[3] == 1) and (result[4] == 1):
-            gesture = "OK"
+            gesture = "ok"
         elif(result[0] == 0) and (result[1] == 0) and (result[2] == 0) and (result[3] == 0) and (result[4] == 0):
             gesture = "stone"
         else:
-            gesture = "not in detect range..."
+            gesture = "None"
         return gesture
     
     
@@ -120,13 +123,20 @@ class CameraInput(QThread):
                             figure_ = self.finger_stretch_detect(landmark[0],landmark[4*k+2],landmark[4*k+4])
                         figure[k] = figure_
                     # print(figure,'\n')
-    
-                    self.gesture_result = self.detect_hands_gesture(figure, landmark)
-                    cv.putText(frame, f"{self.gesture_result}", (30, 45 * i + 90), cv.FONT_HERSHEY_COMPLEX, 1.5, (255 ,255, 0), 5)
+                    new_gesture = self.detect_hands_gesture(figure, landmark)
+                    new_time = time.time()
+                    if new_gesture != self.gesture_result and new_time - self.gesture_result_change_time >= 0.2:
+                        self.gesture_result = new_gesture
+                        self.gesture_result_change_time = new_time
+                    
+                    if new_gesture == self.gesture_result:
+                        self.gesture_result_change_time = new_time
                     
                     self.do_move(landmark)
                     self.do_click()
-
+            else:
+                self.gesture_result = "None"
+            cv.putText(frame, f"{self.gesture_result}", (30, 45 + 45), cv.FONT_HERSHEY_COMPLEX, 1.5, (255 ,255, 0), 5)
             # cv.imshow('frame', frame)
             # 发出一个信号，传递视频帧，用emit方法
             if not self.stop_flag:
@@ -136,13 +146,13 @@ class CameraInput(QThread):
     def do_click(self):
         if self.gesture_result == "stone" and self.move:
             current_time = time.time()
-            if current_time - self.last_click_time >= 1:  # 如果距离上一次点击已经过去了1秒
+            if current_time - self.last_click_time >= 1.5:  # 如果距离上一次点击已经过去了1秒
                 self.mouse.click(Button.left, 1)  # 模拟左键点击一次
                 self.last_click_time = current_time  # 更新上一次点击的时间
                 
     def do_move(self, landmark):
         hand_pos = np.mean(landmark, axis=0)
-        if self.prev_hand_pos is not None and self.gesture_result == "open":
+        if self.prev_hand_pos is not None and self.gesture_result == "open" and self.move:
             # 计算手的移动距离和方向
             hand_movement = hand_pos - self.prev_hand_pos
             # 将手的移动应用到鼠标上

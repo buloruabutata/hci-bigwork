@@ -34,7 +34,7 @@ class App(QMainWindow):
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
         self.setCentralWidget(self.main_wight)
-        self.title = QLabel("请上传需要展示的媒体文件")
+        self.title = QLabel("请选择需要展示的媒体文件")
         self.title.setFont(QFont("微软雅黑", 25, QFont.Bold))
         # self.title.setStyleSheet("color: red")
         self.title.setAlignment(Qt.AlignCenter)
@@ -85,12 +85,14 @@ class App(QMainWindow):
             self.close()
     
     def toVideo(self):
-        self.video_window = Video.VideoWindow()
+        filepath = self.uploadFile("mp4")
+        self.video_window = Video.VideoWindow(filepath)
         self.video_window.show()
         self.close()
         
     def toPdf(self):
-        self.pdf_window = Pdf.PdfWindow()
+        filepath = self.uploadFile("pdf")
+        self.pdf_window = Pdf.PdfWindow(filepath)
         self.pdf_window.show()
         self.close()
         
@@ -98,15 +100,7 @@ class App(QMainWindow):
         fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
         if fname:
             # 获取文件名
-            filename = os.path.basename(fname)
-            if not os.path.exists(f'{type}'):
-                os.makedirs(f'{type}')
-            # 将文件移动到musics文件夹下
-            filepath = os.path.join(f'{type}', filename)
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            os.rename(fname, filepath)
-            return filepath
+            return os.path.abspath(fname)
         return None
     
     def uploadMp3File(self, type="mp3"):

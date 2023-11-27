@@ -10,6 +10,7 @@ from Method import *
 import os
 import random
 from Gesture import CameraInput
+import time
 
 class MusicWindow(QMainWindow):
     def __init__(self, mp3filepath=None):
@@ -18,6 +19,10 @@ class MusicWindow(QMainWindow):
         self.main_UI()
         self.music_UI()
         self.camera_UI()
+        
+        self.last_time = 0
+        # 0休眠 1默认 2鼠标
+        self.cur_status = 0
         
     def camera_UI(self):
         self.camera_label = QLabel()
@@ -34,6 +39,33 @@ class MusicWindow(QMainWindow):
         image = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(image)
         self.camera_label.setPixmap(pixmap)
+        
+        curtime = time.time()
+        if self.camera_input.gesture_result != "yeah" and self.cur_status == 0:
+            return
+        if self.camera_input.gesture_result == "yeah" and curtime - self.last_time > 3:
+            self.cur_status = self.status_label.switch_mode()
+            if self.cur_status == 2:
+                self.camera_input.move = True
+            else:
+                self.camera_input.move = False
+            self.last_time = curtime
+            return 
+        
+        if self.cur_status == 1 and curtime - self.last_time > 3:
+            if self.camera_input.gesture_result == "left":
+                self.play_prev()
+                self.last_time = curtime
+            if self.camera_input.gesture_result == "right":
+                self.play_next()
+                self.last_time = curtime
+            if self.camera_input.gesture_result == "stone":
+                self.play_or_pause()
+                self.last_time = curtime
+            if self.camera_input.gesture_result == "ok":
+                self.refresh_music()
+                self.last_time = curtime
+            return
  
     def main_UI(self):
         # 设置窗口大小
@@ -61,9 +93,11 @@ class MusicWindow(QMainWindow):
         # 创建
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.main_btn = new_button('./images/home.svg', 100, 100, '首页')
+        self.status_label = StatusQLabel(400, 100, self)
         # 定位
         self.main_layout.addWidget(self.main_btn, 0, 25, 4, 4)
         self.main_layout.addWidget(self.help_btn, 0, 29, 4, 4)
+        self.main_layout.addWidget(self.status_label, 5, 25, 8, 8)
         # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.main_btn.clicked.connect(self.toMain)
@@ -94,11 +128,11 @@ class MusicWindow(QMainWindow):
         # # 创建一个变量，用于记录唱片的旋转角度
         # self.angle = 0
         
-        self.play_btn = new_button('images/pause.svg', 100, 100, '播放')
-        self.prev_btn = new_button('images/prev.svg', 100, 100, '上一首')
-        self.next_btn = new_button('images/next.svg', 100, 100, '下一首')
+        self.play_btn = new_button('images/pause.svg', 100, 100, '播放(👊stone)')
+        self.prev_btn = new_button('images/prev.svg', 100, 100, '上一首(👍left)')
+        self.next_btn = new_button('images/next.svg', 100, 100, '下一首(👍right)')
         self.volume_btn = new_button('images/voice.svg', 100, 100, '音量')
-        self.refresh_btn = new_button('images/refresh.svg', 100, 100, '刷新')
+        self.refresh_btn = new_button('images/refresh.svg', 100, 100, '刷新(👌ok)')
         self.upmp3_btn = new_button('images/upload.svg', 100, 100, '上传')
         
         self.slider = QSlider(Qt.Horizontal, self)
@@ -509,6 +543,10 @@ class MusicWindow(QMainWindow):
                 background: white;
             }
         """)
+        
+    def gesture_control_center(self):
+        if self.camera_input.gesture_result == "yeah":
+            self.status_label.switch_mode()
 
 
 if __name__ == "__main__":

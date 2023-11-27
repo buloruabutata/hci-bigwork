@@ -191,6 +191,29 @@ class ButtonScroll(QWidget):
     #         self.current_scrolling_button.start_stop_scrolling()
     #     self.current_scrolling_button = button
 
+class StatusQLabel(QLabel):
+    def __init__(self, width=100, height=100, parent=None):
+        super(StatusQLabel, self).__init__(parent)
+        self.setFixedSize(QSize(width, height))
+        self.modes = ["休眠模式(通过✌激活)", "默认模式(通过✌切换)", "鼠标模式(通过✌切换)"]
+        self.current_mode = 0
+        self.setText(self.modes[self.current_mode])
+        self.set_font_size_and_color(20, "green")
+
+    def switch_mode(self):
+        self.current_mode = (self.current_mode + 1) % len(self.modes)
+        self.setText(self.modes[self.current_mode])
+        return self.current_mode
+        
+    def set_font_size_and_color(self, font_size, color):
+        font = QFont()
+        font.setPointSize(font_size)
+        self.setFont(font)
+
+        palette = self.palette()
+        palette.setColor(QPalette.WindowText, QColor(color))
+        self.setPalette(palette)
+
 
 if __name__ == "__main__":
     print(search_song_in_file("./list/mp3.txt", "Jack Stauber - buttercup.mp3"))
