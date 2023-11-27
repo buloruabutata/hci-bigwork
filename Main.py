@@ -29,7 +29,7 @@ class App(QMainWindow):
         # 创建一个9*16的网格布局
         for i in range(9):
             for j in range(16):
-                self.main_layout.addWidget(QLabel(f"({i},{j})"), i, j) # 不显示坐标，只添加空的QLabel
+                self.main_layout.addWidget(QLabel(f""), i, j) # 不显示坐标，只添加空的QLabel
         # 将窗口加入布局
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
@@ -39,32 +39,27 @@ class App(QMainWindow):
         # self.title.setStyleSheet("color: red")
         self.title.setAlignment(Qt.AlignCenter)
         self.main_layout.addWidget(self.title, 0, 6, 2, 4)
+        
+        self.set_qss()
+        
  
     def button_UI(self):
         # 设置几个按钮用做调用其他窗口
-        self.music_btn = QPushButton("上传mp3音乐文件")
-        self.music_btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
-        self.music_btn.setFixedSize(400, 100)
-        self.video_btn = QPushButton("上传mp4视频文件")
-        self.video_btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
-        self.video_btn.setFixedSize(400, 100)
-        self.pdf_btn = QPushButton("上传pdf文件")
-        self.pdf_btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
-        self.pdf_btn.setFixedSize(400, 100)
-        self.help_btn = QPushButton()
+        self.music_btn = new_text_button("上传mp3音乐文件", 400, 100, "上传mp3音乐文件")
+        self.video_btn = new_text_button("上传mp4视频文件", 400, 100, "上传mp4视频文件")
+        self.pdf_btn = new_text_button("上传pdf文件", 400, 100, "上传pdf文件")
         
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
+        self.exit_btn = new_button('./images/exit.svg', 100, 100, '退出')
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
-        
-        self.pdf_btn = QPushButton("上传pdf文件")
-        self.pdf_btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
-        self.pdf_btn.setFixedSize(400, 100)
+        self.exit_btn.clicked.connect(self.close_self)
         
         # 将按钮加入布局
         self.main_layout.addWidget(self. music_btn, 2, 6, 2, 4)
         self.main_layout.addWidget(self.video_btn, 4, 6, 2, 4)
         self.main_layout.addWidget(self.pdf_btn, 6, 6, 2, 4)
-        self.main_layout.addWidget(self.help_btn, 0, 14, 2, 2)
+        self.main_layout.addWidget(self.help_btn, 0, 12, 2, 2)
+        self.main_layout.addWidget(self.exit_btn, 0, 14, 2, 2)
         
         self.music_btn.clicked.connect(self.toMusic)
         self.video_btn.clicked.connect(self.toVideo)
@@ -124,6 +119,14 @@ class App(QMainWindow):
             # addMaxMp3Num()
             return filepath
         return None
+
+    def close_self(self):
+        self.close()
+
+    def set_qss(self):
+        #B0E0E6
+        self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;}""")
+        self.setWindowFlag(Qt.FramelessWindowHint)
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -52,6 +52,17 @@ class MusicWindow(QMainWindow):
             self.last_time = curtime
             return 
         
+        if self.cur_status == 1 and curtime - self.last_time > 0.5:
+            if self.camera_input.gesture_result == "up":
+                self.volume_slider.setVisible(True)
+                self.volume_slider.setValue(self.volume_slider.value() + 1)
+                return 
+            if self.camera_input.gesture_result == "down":
+                self.volume_slider.setVisible(True)
+                self.volume_slider.setValue(self.volume_slider.value() - 1)
+                return
+            self.volume_slider.setVisible(False)
+
         if self.cur_status == 1 and curtime - self.last_time > 3:
             if self.camera_input.gesture_result == "left":
                 self.play_prev()
@@ -82,7 +93,7 @@ class MusicWindow(QMainWindow):
         for i in range(18):
             self.main_layout.setRowMinimumHeight(i, 100)
             for j in range(32):
-                self.main_layout.addWidget(QLabel(f"({i},{j})"), i, j) # 不显示坐标，只添加空的QLabel
+                self.main_layout.addWidget(QLabel(f""), i, j) # 不显示坐标，只添加空的QLabel
                 if i == 0:
                     self.main_layout.setColumnMinimumWidth(j, 100)
         # 将窗口加入布局
@@ -171,7 +182,7 @@ class MusicWindow(QMainWindow):
         self.main_layout.addWidget(self.refresh_btn, 16, 13, 4, 2)
         self.main_layout.addWidget(self.volume_btn, 16, 17, 4, 2)
         self.main_layout.addWidget(self.upmp3_btn, 16, 21, 4, 2)
-        self.main_layout.addWidget(self.slider, 0, 2, 2, 20)
+        self.main_layout.addWidget(self.slider, 0, 0, 1, 24)
         
         # 调用初始化音乐列表的方法
         self.init_music_list()
@@ -215,7 +226,7 @@ class MusicWindow(QMainWindow):
                 self.name_list.append("    {}    ".format(file))
                 self.music_list.append(os.path.join('./mp3', file))
         self.list_label = QLabel()
-        self.main_layout.addWidget(self.list_label, 2, 0, 14, 24)
+        self.main_layout.addWidget(self.list_label, 1, 0, 15, 24)
         self.button_scroll = ButtonScroll(self.name_list, self)
         self.list_label.setLayout(self.button_scroll.layout())
         self.volume_slider.raise_()
@@ -467,10 +478,13 @@ class MusicWindow(QMainWindow):
         return None
             
     def set_qss(self):
+        #B0E0E6
+        self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;} """)
+        self.list_label.setStyleSheet("""QLabel {border-radius: 10px; background-color: #45c1d6;}""")
         self.slider.setStyleSheet("""
             QSlider
             {
-                background-color: rgba(22, 22, 22, 0.7);
+                
                 padding-left: 15px;  /*左端点离左边的距离*/
                 padding-right: 15px;
                 border-radius: 5px; /*外边框矩形倒角*/
@@ -485,7 +499,7 @@ class MusicWindow(QMainWindow):
 
             QSlider::sub-page:horizontal
             {
-                background-color: #FF7826;
+                background-color: #8080ff;
                 height:5px;
                 border-radius: 2px;
             }
@@ -516,7 +530,7 @@ class MusicWindow(QMainWindow):
             
             QSlider::add-page:vertical
             {
-                background-color: #FF7826;
+                background-color: #8080ff;
                 width:5px;
                 border-radius: 2px;
             }

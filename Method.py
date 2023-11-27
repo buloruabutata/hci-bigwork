@@ -9,6 +9,16 @@ def new_button(path, width, height, tip):
     btn.setIconSize(QSize(width / 2, height / 2))
     btn.setFixedSize(width, height)
     btn.setToolTip(tip)
+    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px;} QPushButton:hover {background-color: grey;} """)
+    return btn
+
+def new_text_button(text, width, height, tip):
+    btn = QPushButton(text)
+    btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
+    btn.setIconSize(QSize(width / 2, height / 2))
+    btn.setFixedSize(width, height)
+    btn.setToolTip(tip)
+    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px;} QPushButton:hover {background-color: grey;} """)
     return btn
 
 def open_help(url):
@@ -73,7 +83,7 @@ class ScrollingButton(QPushButton):
             self.setStyleSheet('QPushButton {min-height: 50px; border: none;}')
         else:
             self.timer.start(200)
-            self.setStyleSheet('QPushButton {background-color: blue; color: white; border: none; min-height: 50px;}')
+            self.setStyleSheet('QPushButton {background-color: #8080ff; color: white; border: none; min-height: 50px;}')
 
     def update_text(self):
         current_text = self.text()
@@ -81,7 +91,7 @@ class ScrollingButton(QPushButton):
         
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Enter:
-            self.setStyleSheet('QPushButton {background-color: blue; color: white; border: none; min-height: 50px;}')
+            self.setStyleSheet('QPushButton {background-color: #8080ff; color: white; border: none; min-height: 50px;}')
         elif event.type() == QEvent.Leave:
             if not self.timer.isActive():
                 self.setStyleSheet('QPushButton {min-height: 50px; border: none;}')
@@ -95,17 +105,16 @@ class ScrollingButton(QPushButton):
         self.setText(self.original_text)
 
 class ButtonScroll(QWidget):
-    def __init__(self, button_texts, parent):
+    def __init__(self, button_texts, up):
         super().__init__()
         self.button_texts = button_texts
-        self.parent = parent
+        self.up = up
         self.current_scrolling_button = None  # Add a variable to track the current scrolling button
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Button Scroll')
         self.setGeometry(100, 100, 300, 400)
-
         # Create a vertical layout
         self.vlayout = QVBoxLayout()
 
@@ -171,7 +180,7 @@ class ButtonScroll(QWidget):
         
     def start_stop_scrolling(self):
         button = self.sender()
-        self.parent.jump(button.text_change())
+        self.up.jump(button.text_change())
         # if self.current_scrolling_button is not None and self.current_scrolling_button != button:
         if self.current_scrolling_button is not None:
             self.current_scrolling_button.start_stop_scrolling()
@@ -199,6 +208,7 @@ class StatusQLabel(QLabel):
         self.current_mode = 0
         self.setText(self.modes[self.current_mode])
         self.set_font_size_and_color(20, "green")
+        self.setFont(QFont("微软雅黑", 20, QFont.Bold))
 
     def switch_mode(self):
         self.current_mode = (self.current_mode + 1) % len(self.modes)
