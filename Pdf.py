@@ -9,14 +9,19 @@ from Method import *
 import os
 import random
 from Gesture import CameraInput
+import fitz
+from pathlib import Path
+
 
 class PdfWindow(QMainWindow):
-    def __init__(self, pdffilepath=None):
+    def __init__(self, pdffilepath="D:\\file\\2103.14641.pdf"):
         super().__init__()
         self.pdffilepath = pdffilepath
         self.main_UI()
         self.pdf_UI()
         self.camera_UI()
+        # self.initUI()
+        
         
     def camera_UI(self):
         self.camera_label = QLabel()
@@ -61,8 +66,8 @@ class PdfWindow(QMainWindow):
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.main_btn = new_button('./images/home.svg', 100, 100, '首页')
         # 定位
-        self.main_layout.addWidget(self.main_btn, 0, 12, 2, 2)
-        self.main_layout.addWidget(self.help_btn, 0, 14, 2, 2)
+        self.main_layout.addWidget(self.main_btn, 0, 13, 1, 1)
+        self.main_layout.addWidget(self.help_btn, 0, 15, 1, 1)
         # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.main_btn.clicked.connect(self.toMain)
@@ -74,8 +79,131 @@ class PdfWindow(QMainWindow):
         self.close()
         
     def pdf_UI(self):
-        #todo
-        pass
+        self.next_page_btn = new_button('./images/next.svg', 100, 100, '下一页')
+        self.prev_page_btn = new_button('./images/prev.svg', 100, 100, '上一页')
+        # 定位
+        self.main_layout.addWidget(self.prev_page_btn, 1, 13, 1, 1)
+        self.main_layout.addWidget(self.next_page_btn, 1, 15, 1, 1)
+        # 链接到方法
+        self.next_page_btn.clicked.connect(self.next_page)
+        self.prev_page_btn.clicked.connect(self.previous_page)
+
+        self.zoom_down_btn = new_button('./images/zoom_down.svg', 100, 100, '缩小')
+        self.zoom_up_btn = new_button('./images/zoom_up.svg', 100, 100, '放大')
+        # 定位
+        self.main_layout.addWidget(self.zoom_up_btn, 2, 13, 1, 1)
+        self.main_layout.addWidget(self.zoom_down_btn, 2, 15, 1, 1)
+        # 链接到方法
+        self.zoom_up_btn.clicked.connect(self.zoom_up)
+        self.zoom_down_btn.clicked.connect(self.zoom_down)
+
+        self.title = Path(self.pdffilepath).stem # get name of the file, preferred because metadata['title'] is not often available
+        self.doc = fitz.open(self.pdffilepath) # open the given file
+        self.metadata = self.doc.metadata
+        self.pageNumber = 0
+        self.zoom = 1
+        self.renderPage()
+
+
+    def clearLayout(self):
+        self.main_layout.removeWidget(self.label)
+        self.update()
+
+
+    def renderPage(self):
+        page = self.doc[self.pageNumber]
+        zoom_x = self.zoom  # horizontal zoom
+        zomm_y = self.zoom  # vertical zoom
+        mat = fitz.Matrix(zoom_x, zomm_y)  # zoom factor 2 in each dimension
+        pix = page.get_pixmap(matrix=mat)
+        fmt = QImage.Format_RGBA8888 if pix.alpha else QImage.Format_RGB888
+        img = QImage(pix.samples, pix.width, pix.height, pix.stride, fmt)
+        pixmap = QPixmap.fromImage(img)
+
+        self.label = QLabel(self)
+        self.label.setPixmap(pixmap)
+        self.label.setGeometry(QRect(0,0, pix.width, pix.height))
+        self.label.setAlignment(Qt.AlignCenter)
+        self.main_layout.addWidget(self.label,0,0,12,12)
+        # self.vbox.addWidget(label)
+        # self.vbox.setContentsMargins(0, 0, 0, 0)
+
+        self.update()
+
+
+    def saveToFile(self, key, value):
+        storedData = dict()
+
+        if self.fileDataPath.exists():
+            oldData = self.fileDataPath.read_text()
+            if isinstance(eval(oldData), dict):
+                storedData = eval(oldData)
+
+        storedData[key] = value
+        self.fileDataPath.write_text(str(storedData))
+
+
+    def next_page(self):
+        self.clearLayout()
+        self.pageNumber += 1
+        self.renderPage()
+
+
+    def previous_page(self):
+        self.clearLayout()
+        self.pageNumber -= 1
+        self.renderPage()
+
+    def zoom_up(self):
+        self.clearLayout()
+        self.zoom += 0.1
+        if self.zoom>2:
+            self.zoom=2
+        self.renderPage()
+    
+    def zoom_down(self):
+        self.clearLayout()
+        self.zoom -= 0.1
+        if self.zoom<0.5:
+            self.zoom=0.5
+        self.renderPage()
+
+
+    def goto(self, number):
+        self.pageNumber = number
+        self.renderPage()
+
+
+    def quit(self):
+        '''Store current page number and quit.'''
+
+        self.saveToFile("pageNumber", self.pageNumber)
+        QApplication.instance().quit()
+
+
+    def keyPressEvent(self, event):
+        '''Call functions associated with a key press, if any.'''
+
+        global commands
+        key = event.text()
+
+        if key == 'g' or key.isnumeric():
+            commands.append(key)
+            return
+
+        if event.key() == Qt.Key_Escape:
+            commands = []
+            return
+
+        if event.key() == Qt.Key_Return and commands:
+            command = commands[0]
+            number = int("".join(commands[1:]))
+            commands = []
+            self.keymaps[command](number)
+            return
+
+        if key in self.keymaps.keys():
+            self.keymaps[key]()
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)
