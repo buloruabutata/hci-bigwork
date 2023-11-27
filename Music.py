@@ -102,16 +102,21 @@ class MusicWindow(QMainWindow):
         self.setCentralWidget(self.main_wight)
         
         # 创建
+        self.exit_btn = new_button('./images/exit.svg', 100, 100, '退出')
+        self.exit_btn.clicked.connect(self.close_self)
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.main_btn = new_button('./images/home.svg', 100, 100, '首页')
         self.status_label = StatusQLabel(400, 100, self)
         # 定位
-        self.main_layout.addWidget(self.main_btn, 0, 25, 4, 4)
-        self.main_layout.addWidget(self.help_btn, 0, 29, 4, 4)
+        self.main_layout.addWidget(self.main_btn, 0, 24, 4, 4)
+        self.main_layout.addWidget(self.help_btn, 0, 27, 4, 4)
+        self.main_layout.addWidget(self.exit_btn, 0, 30, 4, 4)
         self.main_layout.addWidget(self.status_label, 5, 25, 8, 8)
         # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
+        self.exit_btn.clicked.connect(self.close_self)
         self.main_btn.clicked.connect(self.toMain)
+        
         
         
     def music_UI(self):
@@ -182,7 +187,7 @@ class MusicWindow(QMainWindow):
         self.main_layout.addWidget(self.refresh_btn, 16, 13, 4, 2)
         self.main_layout.addWidget(self.volume_btn, 16, 17, 4, 2)
         self.main_layout.addWidget(self.upmp3_btn, 16, 21, 4, 2)
-        self.main_layout.addWidget(self.slider, 0, 0, 1, 24)
+        self.main_layout.addWidget(self.slider, 15, 0, 1, 24)
         
         # 调用初始化音乐列表的方法
         self.init_music_list()
@@ -226,7 +231,7 @@ class MusicWindow(QMainWindow):
                 self.name_list.append("    {}    ".format(file))
                 self.music_list.append(os.path.join('./mp3', file))
         self.list_label = QLabel()
-        self.main_layout.addWidget(self.list_label, 1, 0, 15, 24)
+        self.main_layout.addWidget(self.list_label, 0, 0, 15, 24)
         self.button_scroll = ButtonScroll(self.name_list, self)
         self.list_label.setLayout(self.button_scroll.layout())
         self.volume_slider.raise_()
@@ -476,11 +481,16 @@ class MusicWindow(QMainWindow):
             print(filepath)
             return filepath
         return None
+
+    def close_self(self):
+        self.close()
             
     def set_qss(self):
         #B0E0E6
-        self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;} """)
-        self.list_label.setStyleSheet("""QLabel {border-radius: 10px; background-color: #45c1d6;}""")
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setAttribute(Qt.WA_TranslucentBackground)
+        self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;}""")
+        # self.list_label.setStyleSheet("""QLabel {border-radius: 10px; background-color: #45c1d6;}""")
         self.slider.setStyleSheet("""
             QSlider
             {

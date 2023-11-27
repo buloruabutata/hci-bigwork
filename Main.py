@@ -81,15 +81,17 @@ class App(QMainWindow):
     
     def toVideo(self):
         filepath = self.uploadFile("mp4")
-        self.video_window = Video.VideoWindow(filepath)
-        self.video_window.show()
-        self.close()
+        if filepath:
+            self.video_window = Video.VideoWindow(filepath)
+            self.video_window.show()
+            self.close()
         
     def toPdf(self):
         filepath = self.uploadFile("pdf")
-        self.pdf_window = Pdf.PdfWindow(filepath)
-        self.pdf_window.show()
-        self.close()
+        if filepath:
+            self.pdf_window = Pdf.PdfWindow(filepath)
+            self.pdf_window.show()
+            self.close()
         
     def uploadFile(self, type="mp3"):
         fname, _ = QFileDialog.getOpenFileName(self, f'选择{type}文件', '', f'{type}文件 (*.{type})')
