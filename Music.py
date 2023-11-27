@@ -147,7 +147,7 @@ class MusicWindow(QMainWindow):
         self.play_btn = new_button('images/pause.svg', 100, 100, '播放(👊stone)')
         self.prev_btn = new_button('images/prev.svg', 100, 100, '上一首(👍left)')
         self.next_btn = new_button('images/next.svg', 100, 100, '下一首(👍right)')
-        self.volume_btn = new_button('images/voice.svg', 100, 100, '音量')
+        self.volume_btn = new_button('images/voice.svg', 100, 100, '音量(👆或者👇)')
         self.refresh_btn = new_button('images/refresh.svg', 100, 100, '刷新(👌ok)')
         self.upmp3_btn = new_button('images/upload.svg', 100, 100, '上传')
         
@@ -365,20 +365,16 @@ class MusicWindow(QMainWindow):
         if state == QMediaPlayer.PlayingState:
             self.play_btn.setIcon(QIcon('images/pause.svg'))
             self.play_btn.setToolTip('暂停')
-            # 启动定时器，每隔10毫秒触发一次
-            self.music_timer.start(10)
         # 否则，就把播放按钮的图片和提示文本改为播放
         else:
             self.play_btn.setIcon(QIcon('images/play.svg'))
             self.play_btn.setToolTip('播放')
-            # 停止定时器
-            self.music_timer.stop()
     
     # 更新进度滑动条的槽函数
     def update_slider(self, position):
         # 如果媒体播放器的总时长不为0，就把进度滑动条的值设置为媒体播放器的播放位置除以媒体播放器的总时长乘以100
         if self.music_player.duration() != 0:
-            self.slider.setValue(position * 100 / self.music_player.duration())
+            self.slider.setValue(position * 600 / self.music_player.duration())
     
     # 检查是否播放完毕的槽函数
     def check_end(self, status):
