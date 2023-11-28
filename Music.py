@@ -22,7 +22,8 @@ class MusicWindow(QMainWindow):
         
         self.last_time = 0
         # 0休眠 1默认 2鼠标
-        self.cur_status = 0
+        self.cur_status = 2
+        self.camera_input.move = True
         
     def camera_UI(self):
         self.camera_label = QLabel()
@@ -231,7 +232,15 @@ class MusicWindow(QMainWindow):
         self.main_layout.addWidget(self.refresh_btn, 16, 13, 4, 2)
         self.main_layout.addWidget(self.volume_btn, 16, 17, 4, 2)
         self.main_layout.addWidget(self.upmp3_btn, 16, 21, 4, 2)
-        self.main_layout.addWidget(self.slider, 15, 0, 1, 24)
+        self.main_layout.addWidget(self.slider, 15, 0, 1, 21)
+        
+        # 创建一个 QLabel 对象来显示时间
+        self.time_label = QLabel(self)
+        # 设置初始文本
+        self.time_label.setText("00:00 / 00:00")
+        # 将标签添加到布局中
+        self.main_layout.addWidget(self.time_label, 15, 21, 1, 3)
+
         
         # 调用初始化音乐列表的方法
         self.init_music_list()
@@ -419,6 +428,17 @@ class MusicWindow(QMainWindow):
         # 如果媒体播放器的总时长不为0，就把进度滑动条的值设置为媒体播放器的播放位置除以媒体播放器的总时长乘以100
         if self.music_player.duration() != 0:
             self.slider.setValue(position * 600 / self.music_player.duration())
+            # 获取音乐的总时间和当前时间
+            total_time = self.music_player.duration()
+            current_time = self.music_player.position()
+            # 将时间从毫秒转换为分钟和秒
+            total_min, total_sec = divmod(total_time, 60000)
+            current_min, current_sec = divmod(current_time, 60000)
+            total_sec = int(total_sec / 1000)
+            current_sec = int(current_sec / 1000)
+            # 更新标签的文本
+            self.time_label.setText(f"{current_min}:{current_sec:02} / {total_min}:{total_sec:02}")
+
     
     # 检查是否播放完毕的槽函数
     def check_end(self, status):

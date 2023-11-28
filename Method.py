@@ -230,6 +230,30 @@ class StatusQLabel(QLabel):
         palette = self.palette()
         palette.setColor(QPalette.WindowText, QColor(color))
         self.setPalette(palette)
+    
+class MainStatusQLabel(QLabel):
+    def __init__(self, width=100, height=100, parent=None):
+        super(MainStatusQLabel, self).__init__(parent)
+        self.setFixedSize(QSize(width, height))
+        self.modes = ["休眠模式(通过✌激活)", "鼠标模式(通过✌切换)"]
+        self.current_mode = 0
+        self.setText(self.modes[self.current_mode])
+        self.set_font_size_and_color(20, "green")
+        self.setFont(QFont("微软雅黑", 20, QFont.Bold))
+
+    def switch_mode(self):
+        self.current_mode = (self.current_mode + 1) % len(self.modes)
+        self.setText(self.modes[self.current_mode])
+        return self.current_mode
+        
+    def set_font_size_and_color(self, font_size, color):
+        font = QFont()
+        font.setPointSize(font_size)
+        self.setFont(font)
+
+        palette = self.palette()
+        palette.setColor(QPalette.WindowText, QColor(color))
+        self.setPalette(palette)
 
 
 if __name__ == "__main__":

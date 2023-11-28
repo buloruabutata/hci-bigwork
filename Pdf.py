@@ -23,7 +23,8 @@ class PdfWindow(QMainWindow):
         self.camera_UI()
         self.last_time = 0
         # 0休眠 1默认 2鼠标
-        self.cur_status = 0
+        self.cur_status = 2
+        self.camera_input.move = True
         # self.initUI()
         
         

@@ -6,18 +6,77 @@ import sys
 import Music
 import Video
 import Pdf
+import time
 import os
 from Method import *
+from Gesture import CameraInput
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.main_UI()
         self.button_UI()
+        self.camera_UI()
+        
+        self.last_time = 0
+        # 0休眠 1默认 2鼠标
+        self.cur_status = 0
+    
+    def camera_UI(self):
+        self.status_label = MainStatusQLabel(400, 100, self)
+        self.main_layout.addWidget(self.status_label, 5, 25, 8, 8)
+        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
+        self.main_layout.addWidget(self.gesture_label, 3, 25, 8, 8)
+        self.gesture_usage = new_text_label("无", 200, 50)
+        self.main_layout.addWidget(self.gesture_usage, 3, 29, 8, 8)
+        self.camera_label = QLabel()
+        # self.camera_label.setFixedSize(400, 400)
+        self.camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.main_layout.addWidget(self.camera_label, 10, 24, 8, 8)
+        self.camera_input = CameraInput()
+        self.camera_input.stop_flag = False
+        self.camera_input.start()
+        # 新增一个信号和槽函数，用于显示摄像头捕获的图像
+        self.camera_input.frame_ready.connect(self.on_frame_ready)
+        
+
+    # 新增一个槽函数，用于显示摄像头捕获的图像
+    def on_frame_ready(self, frame):
+        image = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(image)
+        self.camera_label.setPixmap(pixmap)
+        
+        self.update_gesture_label()
+        
+        curtime = time.time()
+        if self.camera_input.gesture_result != "yeah" and self.cur_status == 0:
+            return
+        if self.camera_input.gesture_result == "yeah" and curtime - self.last_time > 3:
+            self.cur_status = self.status_label.switch_mode()
+            if self.cur_status == 1:
+                self.camera_input.move = True
+            else:
+                self.camera_input.move = False
+            self.last_time = curtime
+            return 
+    
+    def update_gesture_label(self):
+        if self.cur_status == 1:
+            if self.camera_input.gesture_result == "open":
+                self.gesture_usage.setText("移动鼠标")
+                return
+            if self.camera_input.gesture_result == "stone":
+                self.gesture_usage.setText("单击鼠标左键")
+                return
+            self.gesture_usage.setText("固定鼠标")
+            return
+        
+        # if self.camera_input.gesture_result == "None":
+        self.gesture_usage.setText("无")
  
     def main_UI(self):
         # 设置窗口大小
-        self.setFixedSize(1600, 900)
+        self.setFixedSize(1920, 1000)
         # 设置窗口名称
         self.setWindowTitle("基于AI的多媒体辅助控制系统")
         # 设置窗口的图片
@@ -27,27 +86,30 @@ class App(QMainWindow):
         # 设置一个主窗口布局--我比较喜欢网格布局
         self.main_layout = QGridLayout()
         # 创建一个9*16的网格布局
-        for i in range(9):
-            for j in range(16):
+        for i in range(18):
+            self.main_layout.setRowMinimumHeight(i, 100)
+            for j in range(32):
                 self.main_layout.addWidget(QLabel(f""), i, j) # 不显示坐标，只添加空的QLabel
+                if i == 0:
+                    self.main_layout.setColumnMinimumWidth(j, 100)
         # 将窗口加入布局
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
         self.setCentralWidget(self.main_wight)
-        self.title = QLabel("请选择需要展示的媒体文件")
+        self.title = QLabel("请选择需要展示的媒体类型")
         self.title.setFont(QFont("微软雅黑", 25, QFont.Bold))
         # self.title.setStyleSheet("color: red")
         self.title.setAlignment(Qt.AlignCenter)
-        self.main_layout.addWidget(self.title, 0, 6, 2, 4)
+        self.main_layout.addWidget(self.title, 0, 12, 4, 8)
         
         self.set_qss()
         
  
     def button_UI(self):
         # 设置几个按钮用做调用其他窗口
-        self.music_btn = new_text_button("上传mp3音乐文件", 400, 100, "上传mp3音乐文件")
-        self.video_btn = new_text_button("上传mp4视频文件", 400, 100, "上传mp4视频文件")
-        self.pdf_btn = new_text_button("上传pdf文件", 400, 100, "上传pdf文件")
+        self.music_btn = new_text_button("进入音乐(mp3)播放界面", 400, 100, "上传mp3音乐文件")
+        self.video_btn = new_text_button("进入视频(mp4)播放界面", 400, 100, "上传mp4视频文件")
+        self.pdf_btn = new_text_button("进入pdf播放界面", 400, 100, "上传pdf文件")
         
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.exit_btn = new_button('./images/exit.svg', 100, 100, '退出')
@@ -55,11 +117,11 @@ class App(QMainWindow):
         self.exit_btn.clicked.connect(self.close_self)
         
         # 将按钮加入布局
-        self.main_layout.addWidget(self. music_btn, 2, 6, 2, 4)
-        self.main_layout.addWidget(self.video_btn, 4, 6, 2, 4)
-        self.main_layout.addWidget(self.pdf_btn, 6, 6, 2, 4)
-        self.main_layout.addWidget(self.help_btn, 0, 12, 2, 2)
-        self.main_layout.addWidget(self.exit_btn, 0, 14, 2, 2)
+        self.main_layout.addWidget(self. music_btn, 4, 12, 4, 8)
+        self.main_layout.addWidget(self.video_btn, 8, 12, 4, 8)
+        self.main_layout.addWidget(self.pdf_btn, 12, 12, 4, 8)
+        self.main_layout.addWidget(self.help_btn, 0, 24, 4, 4)
+        self.main_layout.addWidget(self.exit_btn, 0, 28, 4, 4)
         
         self.music_btn.clicked.connect(self.toMusic)
         self.video_btn.clicked.connect(self.toVideo)
@@ -128,7 +190,7 @@ class App(QMainWindow):
     def set_qss(self):
         #B0E0E6
         self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;}""")
-        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowFlag(Qt.FramelessWindowHint)
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -21,7 +21,8 @@ class VideoWindow(QMainWindow):
         self.video_UI()
         self.last_time = 0
         # 0休眠 1默认 2鼠标
-        self.cur_status = 0
+        self.cur_status = 2
+        self.camera_input.move = True
         self.player.error.connect(self.handle_error)
         
     def camera_UI(self):
@@ -212,7 +213,7 @@ class VideoWindow(QMainWindow):
         self.slider.setMaximum(600)
         # 设置滑动条的初始值
         self.slider.setValue(0)
-        self.main_layout.addWidget(self.slider, 15, 0, 1, 24)
+        self.main_layout.addWidget(self.slider, 15, 0, 1, 21)
         # 连接进度滑动条的值改变信号和设置播放位置的槽函数
         self.slider.valueChanged.connect(self.set_position)
         self.player.positionChanged.connect(self.update_slider)
@@ -230,6 +231,14 @@ class VideoWindow(QMainWindow):
         self.main_layout.addWidget(self.volume_slider, 10, 17, 6, 2)
         self.volume_slider.raise_()
         self.volume_slider.valueChanged.connect(self.set_volume)
+        
+		# 创建一个 QLabel 对象来显示时间
+        self.time_label = QLabel(self)
+        # 设置初始文本
+        self.time_label.setText("00:00 / 00:00")
+        # 将标签添加到布局中
+        self.main_layout.addWidget(self.time_label, 15, 21, 1, 3)
+        
         
         self.set_qss()
 
@@ -276,7 +285,17 @@ class VideoWindow(QMainWindow):
         # 如果媒体播放器的总时长不为0，就把进度滑动条的值设置为媒体播放器的播放位置除以媒体播放器的总时长乘以100
         if self.player.duration() != 0:
             self.slider.setValue(position * 600 / self.player.duration())
-
+            # 获取音乐的总时间和当前时间
+            total_time = self.player.duration()
+            current_time = self.player.position()
+            # 将时间从毫秒转换为分钟和秒
+            total_min, total_sec = divmod(total_time, 60000)
+            current_min, current_sec = divmod(current_time, 60000)
+            total_sec = int(total_sec / 1000)
+            current_sec = int(current_sec / 1000)
+            # 更新标签的文本
+            self.time_label.setText(f"{current_min}:{current_sec:02} / {total_min}:{total_sec:02}")
+            
     def close_self(self):
         self.close()
 
