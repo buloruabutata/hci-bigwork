@@ -121,7 +121,7 @@ class VideoWindow(QMainWindow):
         # 设置窗口大小
         self.setFixedSize(1920, 1000)
         # 设置窗口名称
-        self.setWindowTitle("基于AI的多媒体辅助控制系统")
+        self.setWindowTitle("基于手势识别的多媒体辅助控制系统")
         # 设置窗口的图片
         # self.setWindowIcon(QIcon("xxx.svg"))
         # 设置一个主窗口

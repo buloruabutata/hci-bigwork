@@ -9,7 +9,7 @@ def new_button(path, width, height, tip):
     btn.setIconSize(QSize(width / 2, height / 2))
     btn.setFixedSize(width, height)
     btn.setToolTip(tip)
-    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px;} QPushButton:hover {background-color: grey;} """)
+    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px; background-color:transparent;} QPushButton:hover {background-color: grey;} """)
     return btn
 
 def new_text_button(text, width, height, tip):
@@ -18,14 +18,14 @@ def new_text_button(text, width, height, tip):
     btn.setIconSize(QSize(width / 2, height / 2))
     btn.setFixedSize(width, height)
     btn.setToolTip(tip)
-    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px;} QPushButton:hover {background-color: grey;} """)
+    btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px; background-color:transparent;} QPushButton:hover {background-color: grey;} """)
     return btn
 
 def new_text_label(text, width, height):
     btn = QLabel(text)
-    btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
+    btn.setFont(QFont("微软雅黑", 15, QFont.Bold))
     btn.setFixedSize(width, height)
-    btn.setStyleSheet("""QLabel {border: None; color red} """)
+    btn.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
     return btn
 
 def open_help(url):
@@ -211,11 +211,12 @@ class StatusQLabel(QLabel):
     def __init__(self, width=100, height=100, parent=None):
         super(StatusQLabel, self).__init__(parent)
         self.setFixedSize(QSize(width, height))
-        self.modes = ["休眠模式(通过✌激活)", "默认模式(通过✌切换)", "鼠标模式(通过✌切换)"]
-        self.current_mode = 0
+        self.modes = [ "休眠模式(通过✌激活)", "默认模式(通过✌切换)","鼠标模式(通过✌切换)"]
+        self.current_mode = 2
         self.setText(self.modes[self.current_mode])
         self.set_font_size_and_color(20, "green")
-        self.setFont(QFont("微软雅黑", 20, QFont.Bold))
+        self.setFont(QFont("微软雅黑", 15, QFont.Bold))
+        self.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
 
     def switch_mode(self):
         self.current_mode = (self.current_mode + 1) % len(self.modes)
@@ -240,6 +241,8 @@ class MainStatusQLabel(QLabel):
         self.setText(self.modes[self.current_mode])
         self.set_font_size_and_color(20, "green")
         self.setFont(QFont("微软雅黑", 20, QFont.Bold))
+        self.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
+
 
     def switch_mode(self):
         self.current_mode = (self.current_mode + 1) % len(self.modes)

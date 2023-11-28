@@ -31,8 +31,9 @@ class PdfWindow(QMainWindow):
     def camera_UI(self):
         self.camera_label = QLabel()
         self.camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.camera_label.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
         # (5,12)是左上角坐标 （4，4）是大小
-        self.main_layout.addWidget(self.camera_label, 10, 24, 8, 8)
+        self.main_layout.addWidget(self.camera_label, 12, 24, 8, 8)
         self.camera_input = CameraInput()
         self.camera_input.stop_flag = False
         self.camera_input.start()
@@ -43,7 +44,12 @@ class PdfWindow(QMainWindow):
     def on_frame_ready(self, frame):
         image = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(image)
-        self.camera_label.setPixmap(pixmap)
+        # 获取label的大小
+        label_size = self.camera_label.size()
+        # 将pixmap缩放到label的大小
+        scaled_pixmap = pixmap.scaled(label_size, Qt.KeepAspectRatio)
+        self.camera_label.setPixmap(scaled_pixmap)
+        # self.camera_label.setPixmap(pixmap)
         
         curtime = time.time()
         if self.camera_input.gesture_result != "yeah" and self.cur_status == 0:
@@ -62,11 +68,11 @@ class PdfWindow(QMainWindow):
             time_rate = 2
         if self.cur_status == 1 and curtime - self.last_time > time_rate:
             if self.camera_input.gesture_result == "up":
-                self.zoom_up()
+                self.full_self()
                 self.last_time = curtime
                 return 
             if self.camera_input.gesture_result == "down":
-                self.zoom_down()
+                self.no_full_self()
                 self.last_time = curtime
                 return
 
@@ -127,10 +133,11 @@ class PdfWindow(QMainWindow):
         self.gesture_usage.setText("无")
     
     def main_UI(self):
+        self.full = False
         # 设置窗口大小
         self.setFixedSize(1920, 1000)
         # 设置窗口名称
-        self.setWindowTitle("基于AI的多媒体辅助控制系统")
+        self.setWindowTitle("基于手势识别的多媒体辅助控制系统")
         # 设置窗口的图片
         # self.setWindowIcon(QIcon("xxx.svg"))
         # 设置一个主窗口
@@ -158,16 +165,24 @@ class PdfWindow(QMainWindow):
         self.main_layout.addWidget(self.main_btn, 0, 24, 4, 4)
         self.main_layout.addWidget(self.help_btn, 0, 27, 4, 4)
         self.main_layout.addWidget(self.exit_btn, 0, 30, 4, 4)
-        self.main_layout.addWidget(self.status_label, 5, 25, 8, 8)
+        self.main_layout.addWidget(self.status_label, 5, 27, 8, 8)
         # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.main_btn.clicked.connect(self.toMain)
         self.exit_btn.clicked.connect(self.close_self)
         
-        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
-        self.main_layout.addWidget(self.gesture_label, 3, 25, 8, 8)
-        self.gesture_usage = new_text_label("无", 200, 50)
-        self.main_layout.addWidget(self.gesture_usage, 3, 29, 8, 8)
+        self.gesture_label = new_text_label("当前手势功能：", 150, 50)
+        self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
+        self.gesture_usage = new_text_label("无", 150, 50)
+        self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
+    
+    def set_btn_visible(self, visible):
+        self.next_page_btn.setVisible(visible)
+        self.prev_page_btn.setVisible(visible)
+        self.zoom_down_btn.setEnabled(not visible)
+        self.zoom_up_btn.setVisible(visible)
+        # self.refresh_btn.setVisible(not visible)
+        self.uppdf_btn.setVisible(visible)
         
     def refresh_pdf(self):
         # 设置媒体播放器的播放位置为0
@@ -188,25 +203,26 @@ class PdfWindow(QMainWindow):
         self.next_page_btn = new_button('./images/next.svg', 100, 100, '下一页(👍right)')
         self.prev_page_btn = new_button('./images/prev.svg', 100, 100, '上一页(👍left)')
         # 定位
-        self.main_layout.addWidget(self.prev_page_btn, 16, 1, 4, 2)
-        self.main_layout.addWidget(self.next_page_btn, 16, 5, 4, 2)
+        self.main_layout.addWidget(self.prev_page_btn, 16, 9, 4, 2)
+        self.main_layout.addWidget(self.next_page_btn, 16, 13, 4, 2)
         # 链接到方法
         self.next_page_btn.clicked.connect(self.go_next_page)
         self.prev_page_btn.clicked.connect(self.go_prev_page)
 
-        self.zoom_down_btn = new_button('./images/small.svg', 100, 100, '缩小(👇)')
-        self.zoom_up_btn = new_button('./images/big.svg', 100, 100, '放大(👆)')
+        self.zoom_down_btn = new_button('./images/small.svg', 100, 100, '退出全屏(👇)')
+        self.zoom_up_btn = new_button('./images/big.svg', 100, 100, '全屏(👆)')
         self.refresh_btn = new_button('images/return.svg', 100, 100, '保持/适配纵横比(👌ok)')
         self.uppdf_btn = new_button('images/upload.svg', 100, 100, '上传')
         # 定位
-        self.main_layout.addWidget(self.zoom_up_btn, 16, 9, 4, 2)
-        self.main_layout.addWidget(self.zoom_down_btn, 16, 13, 4, 2)
-        self.main_layout.addWidget(self.refresh_btn, 16, 17, 4, 2)
+        self.main_layout.addWidget(self.zoom_up_btn, 16, 17, 4, 2)
+        self.main_layout.addWidget(self.zoom_down_btn, 16, 1, 4, 2)
+        self.main_layout.addWidget(self.refresh_btn, 16, 5, 4, 2)
         self.main_layout.addWidget(self.uppdf_btn, 16, 21, 4, 2)
         self.uppdf_btn.clicked.connect(self.uploadFile)
+        self.zoom_down_btn.setEnabled(False)
         # 链接到方法
-        self.zoom_up_btn.clicked.connect(self.zoom_up)
-        self.zoom_down_btn.clicked.connect(self.zoom_down)
+        self.zoom_up_btn.clicked.connect(self.full_self)
+        self.zoom_down_btn.clicked.connect(self.no_full_self)
         self.refresh_btn.clicked.connect(self.refresh_pdf)
         self.set_qss()
 
@@ -258,6 +274,12 @@ class PdfWindow(QMainWindow):
         self.label.setPixmap(pixmap)
         self.label.setFixedSize(self.xpdf, self.ypdf)
         self.label.setAlignment(Qt.AlignCenter)
+        if self.full:
+            self.main_layout.addWidget(self.label, 0, 0, 18, 32)
+            self.label.stackUnder(self.camera_label)
+            self.label.stackUnder(self.gesture_label)
+            self.label.stackUnder(self.status_label)
+            return
         self.main_layout.addWidget(self.label, 0, 0, 15, 24)
 
         # self.vbox.addWidget(label)
@@ -290,6 +312,24 @@ class PdfWindow(QMainWindow):
             self.current_page -= 1
             self.clearLayout()
             self.renderPage()
+            
+    def full_self(self):
+        self.full = True
+        self.xpdf = 1920
+        self.ypdf = 1000
+        self.set_btn_visible(False)
+        self.main_layout.addWidget(self.camera_label, 15, 28, 3, 4)
+        self.clearLayout()
+        self.renderPage()
+    
+    def no_full_self(self):
+        self.full = False
+        self.xpdf = 1400
+        self.ypdf = 860
+        self.set_btn_visible(True)
+        self.main_layout.addWidget(self.camera_label, 12, 24, 6, 8)
+        self.clearLayout()
+        self.renderPage()
 
     def zoom_up(self):
         self.clearLayout()
