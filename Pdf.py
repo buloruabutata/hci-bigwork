@@ -33,7 +33,7 @@ class PdfWindow(QMainWindow):
         self.camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.camera_label.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
         # (5,12)是左上角坐标 （4，4）是大小
-        self.main_layout.addWidget(self.camera_label, 12, 24, 8, 8)
+        self.main_layout.addWidget(self.camera_label, 10, 24, 8, 8)
         self.camera_input = CameraInput()
         self.camera_input.stop_flag = False
         self.camera_input.start()

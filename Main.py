@@ -24,11 +24,11 @@ class App(QMainWindow):
     
     def camera_UI(self):
         self.status_label = MainStatusQLabel(400, 100, self)
-        self.main_layout.addWidget(self.status_label, 5, 25, 8, 8)
+        self.main_layout.addWidget(self.status_label, 5, 27, 8, 8)
         self.gesture_label = new_text_label("当前手势功能：", 200, 50)
-        self.main_layout.addWidget(self.gesture_label, 3, 25, 8, 8)
+        self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
         self.gesture_usage = new_text_label("无", 200, 50)
-        self.main_layout.addWidget(self.gesture_usage, 3, 29, 8, 8)
+        self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
         self.camera_label = QLabel()
         # self.camera_label.setFixedSize(400, 400)
         self.camera_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -44,7 +44,11 @@ class App(QMainWindow):
     def on_frame_ready(self, frame):
         image = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(image)
-        self.camera_label.setPixmap(pixmap)
+        # 获取label的大小
+        label_size = self.camera_label.size()
+        # 将pixmap缩放到label的大小
+        scaled_pixmap = pixmap.scaled(label_size, Qt.KeepAspectRatio)
+        self.camera_label.setPixmap(scaled_pixmap)
         
         self.update_gesture_label()
         

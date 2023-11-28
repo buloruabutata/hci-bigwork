@@ -240,7 +240,7 @@ class MainStatusQLabel(QLabel):
         self.current_mode = 0
         self.setText(self.modes[self.current_mode])
         self.set_font_size_and_color(20, "green")
-        self.setFont(QFont("微软雅黑", 20, QFont.Bold))
+        self.setFont(QFont("微软雅黑", 15, QFont.Bold))
         self.setStyleSheet("""QLabel {border: None; background-color:transparent;} """)
 
 
