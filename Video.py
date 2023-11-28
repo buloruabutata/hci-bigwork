@@ -41,6 +41,7 @@ class VideoWindow(QMainWindow):
         pixmap = QPixmap.fromImage(image)
         self.camera_label.setPixmap(pixmap)
         
+        self.update_gesture_label()
         curtime = time.time()
         if self.camera_input.gesture_result != "yeah" and self.cur_status == 0:
             return
@@ -78,10 +79,46 @@ class VideoWindow(QMainWindow):
                 self.refresh_video()
                 self.last_time = curtime
         
-    
+    def update_gesture_label(self):
+        if self.cur_status == 1:
+            if self.camera_input.gesture_result == "up":
+                self.gesture_usage.setText("增加音量")
+                return 
+            if self.camera_input.gesture_result == "down":
+                self.gesture_usage.setText("缩小音量")
+                return
+
+        if self.cur_status == 1:
+            if self.camera_input.gesture_result == "left":
+                self.gesture_usage.setText("快退30s")
+                return
+            if self.camera_input.gesture_result == "right":
+                self.gesture_usage.setText("快进30s")
+                return
+            if self.camera_input.gesture_result == "stone":
+                self.gesture_usage.setText("播放/暂停")
+                return
+            if self.camera_input.gesture_result == "ok":
+                self.gesture_usage.setText("从头播放")
+                return
+            self.gesture_usage.setText("无")
+        
+        if self.cur_status == 2:
+            if self.camera_input.gesture_result == "open":
+                self.gesture_usage.setText("移动鼠标")
+                return
+            if self.camera_input.gesture_result == "stone":
+                self.gesture_usage.setText("单击鼠标左键")
+                return
+            self.gesture_usage.setText("固定鼠标")
+            return
+        
+        # if self.camera_input.gesture_result == "None":
+        self.gesture_usage.setText("无")
+        
     def main_UI(self):
         # 设置窗口大小
-        self.setFixedSize(1600, 900)
+        self.setFixedSize(1920, 1000)
         # 设置窗口名称
         self.setWindowTitle("基于AI的多媒体辅助控制系统")
         # 设置窗口的图片
@@ -101,6 +138,11 @@ class VideoWindow(QMainWindow):
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
         self.setCentralWidget(self.main_wight)
+        
+        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
+        self.main_layout.addWidget(self.gesture_label, 3, 25, 8, 8)
+        self.gesture_usage = new_text_label("无", 200, 50)
+        self.main_layout.addWidget(self.gesture_usage, 3, 29, 8, 8)
         
     def toMain(self):
         self.camera_input.stop()

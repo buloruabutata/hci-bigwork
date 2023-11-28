@@ -21,6 +21,13 @@ def new_text_button(text, width, height, tip):
     btn.setStyleSheet("""QPushButton {border: 2px solid black; border-radius: 10px;} QPushButton:hover {background-color: grey;} """)
     return btn
 
+def new_text_label(text, width, height):
+    btn = QLabel(text)
+    btn.setFont(QFont("微软雅黑", 20, QFont.Bold))
+    btn.setFixedSize(width, height)
+    btn.setStyleSheet("""QLabel {border: None; color red} """)
+    return btn
+
 def open_help(url):
     # 使用QDesktopServices.openUrl方法打开网址
     QDesktopServices.openUrl(QUrl(url))

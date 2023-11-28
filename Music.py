@@ -40,6 +40,8 @@ class MusicWindow(QMainWindow):
         pixmap = QPixmap.fromImage(image)
         self.camera_label.setPixmap(pixmap)
         
+        self.update_gesture_label()
+        
         curtime = time.time()
         if self.camera_input.gesture_result != "yeah" and self.cur_status == 0:
             return
@@ -77,10 +79,47 @@ class MusicWindow(QMainWindow):
                 self.refresh_music()
                 self.last_time = curtime
             return
+    
+    def update_gesture_label(self):
+        if self.cur_status == 1:
+            if self.camera_input.gesture_result == "up":
+                self.gesture_usage.setText("增加音量")
+                return 
+            if self.camera_input.gesture_result == "down":
+                self.gesture_usage.setText("缩小音量")
+                return
+
+        if self.cur_status == 1:
+            if self.camera_input.gesture_result == "left":
+                self.gesture_usage.setText("上一首")
+                return
+            if self.camera_input.gesture_result == "right":
+                self.gesture_usage.setText("下一首")
+                return
+            if self.camera_input.gesture_result == "stone":
+                self.gesture_usage.setText("播放/暂停")
+                return
+            if self.camera_input.gesture_result == "ok":
+                self.gesture_usage.setText("从头播放")
+                return
+            self.gesture_usage.setText("无")
+        
+        if self.cur_status == 2:
+            if self.camera_input.gesture_result == "open":
+                self.gesture_usage.setText("移动鼠标")
+                return
+            if self.camera_input.gesture_result == "stone":
+                self.gesture_usage.setText("单击鼠标左键")
+                return
+            self.gesture_usage.setText("固定鼠标")
+            return
+        
+        # if self.camera_input.gesture_result == "None":
+        self.gesture_usage.setText("无")
  
     def main_UI(self):
         # 设置窗口大小
-        self.setFixedSize(1600, 900)
+        self.setFixedSize(1920, 1000)
         # 设置窗口名称
         self.setWindowTitle("基于AI的多媒体辅助控制系统")
         # 设置窗口的图片
@@ -116,6 +155,11 @@ class MusicWindow(QMainWindow):
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.exit_btn.clicked.connect(self.close_self)
         self.main_btn.clicked.connect(self.toMain)
+        
+        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
+        self.main_layout.addWidget(self.gesture_label, 3, 25, 8, 8)
+        self.gesture_usage = new_text_label("无", 200, 50)
+        self.main_layout.addWidget(self.gesture_usage, 3, 29, 8, 8)
         
         
         
