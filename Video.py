@@ -17,8 +17,8 @@ class VideoWindow(QMainWindow):
         super().__init__()
         self.mp4filepath = mp4filepath
         self.main_UI()
-        self.video_UI()
         self.camera_UI()
+        self.video_UI()
         self.last_time = 0
         # 0休眠 1默认 2鼠标
         self.cur_status = 2
@@ -81,7 +81,7 @@ class VideoWindow(QMainWindow):
                 self.play_or_pause()
                 self.last_time = curtime
             if self.camera_input.gesture_result == "ok":
-                self.full_self()
+                self.refresh_video()
                 self.last_time = curtime
         
     def update_gesture_label(self):
@@ -104,7 +104,7 @@ class VideoWindow(QMainWindow):
                 self.gesture_usage.setText("播放/暂停")
                 return
             if self.camera_input.gesture_result == "ok":
-                self.gesture_usage.setText("全屏")
+                self.gesture_usage.setText("从头播放")
                 return
             self.gesture_usage.setText("无")
         
@@ -117,6 +117,8 @@ class VideoWindow(QMainWindow):
                 return
             self.gesture_usage.setText("固定鼠标")
             return
+        
+        # if self.camera_input.gesture_result == "None":
         self.gesture_usage.setText("无")
         
     def main_UI(self):
@@ -142,35 +144,47 @@ class VideoWindow(QMainWindow):
         # 将这个主窗口设置成窗口主部件
         self.setCentralWidget(self.main_wight)
         
+        self.gesture_label = new_text_label("当前手势功能：", 150, 50)
+        self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
+        self.gesture_usage = new_text_label("无", 150, 50)
+        self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
         
     def toMain(self):
         self.camera_input.stop()
+        self.player = None
         self.main_window = Main.App()
         self.main_window.show()
         self.close()
         
     def video_UI(self):
         # 创建视频播放器
-        self.full = False
         self.player = QMediaPlayer()
+        self.player.stateChanged.connect(self.update_play_btn)
+        # 创建视频显示组件
         self.videoWidget = QVideoWidget()
+
+        # 设置视频显示组件的尺寸策略为可扩展
         self.videoWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # 将视频显示组件添加到布局中，并调整其占据的行和列数
+        # 例如，您可以让它占据从第1行到第8行，从第0列到第15列
         self.main_layout.addWidget(self.videoWidget, 0, 0, 15, 24)
+
+        # 将视频显示组件设置为视频播放器的视频输出
         self.player.setVideoOutput(self.videoWidget)
-        # 如果提供了视频文件路径，则加载视频
-        if self.mp4filepath:
-            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.mp4filepath)))
-            self.player.play()
-        self.play_btn = new_button('images/pause.svg', 100, 100, '播放(👊stone)')
+
+        # 创建播放按钮并设置图标
+        self.play_btn = new_button('images/play.svg', 100, 100, '播放(👊stone)')
         self.prev_btn = new_button('images/prev.svg', 100, 100, '快进30秒(👍left)')
         self.next_btn = new_button('images/next.svg', 100, 100, '快退30秒(👍right)')
-        self.refresh_btn = new_button('images/big.svg', 100, 100, '全屏(👌ok)')
+        self.refresh_btn = new_button('images/refresh.svg', 100, 100, '刷新(👌ok)')
         self.volume_btn = new_button('images/voice.svg', 100, 100, '音量(👆或者👇)')
         self.upmp4_btn = new_button('images/upload.svg', 100, 100, '上传')
-        self.main_layout.addWidget(self.prev_btn, 16, 5, 4, 2)
-        self.main_layout.addWidget(self.play_btn, 16, 9, 4, 2)
-        self.main_layout.addWidget(self.next_btn, 16, 13, 4, 2)
-        self.main_layout.addWidget(self.refresh_btn, 16, 1, 4, 2)
+		# 将播放按钮添加到布局中
+        self.main_layout.addWidget(self.prev_btn, 16, 1, 4, 2)
+        self.main_layout.addWidget(self.play_btn, 16, 5, 4, 2)
+        self.main_layout.addWidget(self.next_btn, 16, 9, 4, 2)
+        self.main_layout.addWidget(self.refresh_btn, 16, 13, 4, 2)
         self.main_layout.addWidget(self.volume_btn, 16, 17, 4, 2)
         self.main_layout.addWidget(self.upmp4_btn, 16, 21, 4, 2)
         self.upmp4_btn.clicked.connect(self.uploadFile)
@@ -178,93 +192,74 @@ class VideoWindow(QMainWindow):
         self.play_btn.clicked.connect(self.play_or_pause)
         self.prev_btn.clicked.connect(self.rewind_video)
         self.next_btn.clicked.connect(self.forward_video)
-        self.refresh_btn.clicked.connect(self.full_self)
+        self.refresh_btn.clicked.connect(self.refresh_video)
         self.volume_btn.clicked.connect(self.show_or_hide_volume_slider)
         
+        # 创建
         self.exit_btn = new_button('./images/exit.svg', 100, 100, '退出')
+        self.exit_btn.clicked.connect(self.close_self)
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.main_btn = new_button('./images/home.svg', 100, 100, '首页')
         self.status_label = StatusQLabel(400, 100, self)
         
+        # 定位
         self.main_layout.addWidget(self.main_btn, 0, 24, 4, 4)
         self.main_layout.addWidget(self.help_btn, 0, 27, 4, 4)
         self.main_layout.addWidget(self.exit_btn, 0, 30, 4, 4)
         self.main_layout.addWidget(self.status_label, 5, 27, 8, 8)
+        # 链接到方法
         self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
         self.exit_btn.clicked.connect(self.close_self)
         self.main_btn.clicked.connect(self.toMain)
         
         self.slider = QSlider(Qt.Horizontal, self)
+        # 设置滑动条的最小值和最大值
         self.slider.setMinimum(0)
         self.slider.setMaximum(600)
+        # 设置滑动条的初始值
         self.slider.setValue(0)
         self.main_layout.addWidget(self.slider, 15, 0, 1, 21)
+        # 连接进度滑动条的值改变信号和设置播放位置的槽函数
         self.slider.valueChanged.connect(self.set_position)
         self.player.positionChanged.connect(self.update_slider)
-        self.player.stateChanged.connect(self.update_play_btn)
         
+        # 创建一个滑动条，用于调节音量
         self.volume_slider = QSlider(Qt.Vertical, self)
+        # 设置滑动条的最小值和最大值
         self.volume_slider.setMinimum(0)
         self.volume_slider.setMaximum(100)
+        # 设置滑动条的初始值
         self.volume_slider.setValue(50)
+        # 设置滑动条的可见性
         self.volume_slider.setVisible(False)
         self.volume_slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.main_layout.addWidget(self.volume_slider, 10, 17, 6, 2)
         self.volume_slider.raise_()
         self.volume_slider.valueChanged.connect(self.set_volume)
+        
+		# 创建一个 QLabel 对象来显示时间
         self.time_label = QLabel(self)
+        # 设置初始文本
         self.time_label.setText("00:00 / 00:00")
+        # 将标签添加到布局中
         self.main_layout.addWidget(self.time_label, 15, 21, 1, 3)
-        self.gesture_label = new_text_label("当前手势功能：", 150, 50)
-        self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
-        self.gesture_usage = new_text_label("无", 150, 50)
-        self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
+        
         
         self.set_qss()
- 
 
-    def set_btn_visible(self, visible):
-        self.next_btn.setVisible(visible)
-        self.prev_btn.setVisible(visible)
-        self.play_btn.setVisible(visible)
-        self.upmp4_btn.setVisible(visible)
-        self.slider.setVisible(visible)
-        self.main_btn.setVisible(visible)
-        self.help_btn.setVisible(visible)
-        self.time_label.setVisible(visible)
-        self.exit_btn.setVisible(visible)
-        # # self.refresh_btn.setVisible(not visible)
-        self.volume_btn.setVisible(visible)    
-        pass
-
-    def full_self(self):
-        if self.full:
-            self.full = False
-            self.set_btn_visible(True)
-            self.refresh_btn.setIcon((QIcon("./images/big.svg")))
-            self.main_layout.addWidget(self.videoWidget, 0, 0, 15, 24)
-            self.main_layout.addWidget(self.camera_label, 10, 24, 8, 8)
-        else:
-            self.full = True
-            self.set_btn_visible(False)
-            self.refresh_btn.setIcon((QIcon("./images/small.svg")))
-            self.main_layout.addWidget(self.videoWidget, 0, 0, 18, 32)
-            self.main_layout.addWidget(self.camera_label, 15, 28, 3, 4)
-            self.refresh_btn.setFlat(True)
-            self.camera_label.raise_()
-            self.refresh_btn.raise_()
-            self.gesture_label.raise_()
-            self.gesture_usage.raise_()
-            self.status_label.raise_()
-
+        # 如果提供了视频文件路径，则加载视频
+        if self.mp4filepath:
+            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.mp4filepath)))
+            self.player.play()
+        
     def uploadFile(self):
         fname, _ = QFileDialog.getOpenFileName(self, f'选择mp4文件', '', f'mp4文件 (*.mp4)')
         if fname:
             self.mp4filepath = os.path.abspath(fname)
             self.player.setMedia(QMediaContent(QUrl.fromLocalFile(fname)))
             self.player.play()
-
-# 显示或隐藏音量滑动条的槽函数
+	
+	# 显示或隐藏音量滑动条的槽函数
     def show_or_hide_volume_slider(self):
         # 如果音量滑动条是可见的，就隐藏它
         if self.volume_slider.isVisible():
@@ -273,7 +268,7 @@ class VideoWindow(QMainWindow):
         else:
             self.volume_slider.setVisible(True)
     
-# 设置音量的槽函数
+	# 设置音量的槽函数
     def set_volume(self, value):
         # 设置媒体播放器的音量为滑动条的值
         self.player.setVolume(value)
@@ -307,7 +302,7 @@ class VideoWindow(QMainWindow):
             self.time_label.setText(f"{current_min}:{current_sec:02} / {total_min}:{total_sec:02}")
             
     def close_self(self):
-        sys.exit()
+        self.close()
 
     def play_or_pause(self):
         # 如果媒体播放器的状态是播放中，就暂停播放
@@ -323,7 +318,7 @@ class VideoWindow(QMainWindow):
         # 开始播放
         self.player.play()
     
-# 更新播放按钮的槽函数
+	# 更新播放按钮的槽函数
     def update_play_btn(self, state):
         # 如果媒体播放器的状态是播放中，就把播放按钮的图片和提示文本改为暂停
         if state == QMediaPlayer.PlayingState:
@@ -350,7 +345,11 @@ class VideoWindow(QMainWindow):
         print("播放器错误：", self.player.errorString())
     
     def set_qss(self):
+        #B0E0E6
+        # self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setAttribute(Qt.WA_TranslucentBackground)
         self.main_wight.setStyleSheet("""QWidget {background-color: #d3e6ef;}""")
+        # self.list_label.setStyleSheet("""QLabel {border-radius: 10px; background-color: #45c1d6;}""")
         self.slider.setStyleSheet("""
             QSlider
             {

@@ -25,9 +25,9 @@ class App(QMainWindow):
     def camera_UI(self):
         self.status_label = MainStatusQLabel(400, 100, self)
         self.main_layout.addWidget(self.status_label, 5, 27, 8, 8)
-        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
+        self.gesture_label = new_text_label("当前手势功能：", 150, 50)
         self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
-        self.gesture_usage = new_text_label("无", 200, 50)
+        self.gesture_usage = new_text_label("无", 150, 50)
         self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
         self.camera_label = QLabel()
         # self.camera_label.setFixedSize(400, 400)
@@ -132,11 +132,10 @@ class App(QMainWindow):
         self.pdf_btn.clicked.connect(self.toPdf)
  
     def toMusic(self):
-        # mp3dict = read_txt_file("./list/mp3.txt")
-        # if os.path.getsize("list/mp3.txt") == 0:
         if len(os.listdir("./mp3")) == 0:
             mp3filepath = self.uploadMp3File("mp3")
             if mp3filepath:
+                self.camera_input.stop()
                 self.music_window = Music.MusicWindow(mp3filepath)
                 self.music_window.show()
                 self.close()
@@ -148,6 +147,7 @@ class App(QMainWindow):
     def toVideo(self):
         filepath = self.uploadFile("mp4")
         if filepath:
+            self.camera_input.stop()
             self.video_window = Video.VideoWindow(filepath)
             self.video_window.show()
             self.close()
@@ -155,6 +155,7 @@ class App(QMainWindow):
     def toPdf(self):
         filepath = self.uploadFile("pdf")
         if filepath:
+            self.camera_input.stop()
             self.pdf_window = Pdf.PdfWindow(filepath)
             self.pdf_window.show()
             self.close()
