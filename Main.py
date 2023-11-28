@@ -189,7 +189,7 @@ class App(QMainWindow):
         return None
 
     def close_self(self):
-        self.close()
+        sys.exit()
 
     def set_qss(self):
         #B0E0E6

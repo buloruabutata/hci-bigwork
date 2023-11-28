@@ -191,7 +191,7 @@ class PdfWindow(QMainWindow):
         self.renderPage()
         
     def close_self(self):
-        self.close()
+        sys.exit()
         
     def toMain(self):
         self.camera_input.stop()

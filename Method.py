@@ -200,6 +200,18 @@ class ButtonScroll(QWidget):
             self.current_scrolling_button.start_stop_scrolling()
         self.current_scrolling_button = button
         self.current_scrolling_button.start_stop_scrolling()
+    
+    def scroll_down(self, value = 0):
+        if value == 1:
+            self.scroll_area.verticalScrollBar().setValue(0)
+            return
+        if value == 2:
+            self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().value() - 50)
+            return
+        if value == 3:
+            self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().maximum())
+            return
+        self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().value() + 50)
         
     # def scrolling_by_outside_click(self, index):
     #     button = self.buttons[index]

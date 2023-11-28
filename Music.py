@@ -161,9 +161,9 @@ class MusicWindow(QMainWindow):
         self.exit_btn.clicked.connect(self.close_self)
         self.main_btn.clicked.connect(self.toMain)
         
-        self.gesture_label = new_text_label("当前手势功能：", 200, 50)
+        self.gesture_label = new_text_label("当前手势功能：", 150, 50)
         self.main_layout.addWidget(self.gesture_label, 3, 27, 8, 8)
-        self.gesture_usage = new_text_label("无", 200, 50)
+        self.gesture_usage = new_text_label("无", 150, 50)
         self.main_layout.addWidget(self.gesture_usage, 3, 30, 8, 8)
         
         
@@ -368,6 +368,9 @@ class MusicWindow(QMainWindow):
             # 设置媒体播放器的媒体内容为上一首音乐的路径
             self.setMusic()
             self.button_scroll.scrolling_by_outside(self.current_index)
+            self.button_scroll.scroll_down(2)
+            if self.current_index == len(self.music_list) - 1:
+                self.button_scroll.scroll_down(3)
             # 开始播放
             self.music_player.play()
     
@@ -382,6 +385,9 @@ class MusicWindow(QMainWindow):
             # 设置媒体播放器的媒体内容为下一首音乐的路径
             self.setMusic()
             self.button_scroll.scrolling_by_outside(self.current_index)
+            self.button_scroll.scroll_down()
+            if self.current_index == 0:
+                self.button_scroll.scroll_down(1)
             # 开始播放
             self.music_player.play()
     
@@ -547,7 +553,7 @@ class MusicWindow(QMainWindow):
         return None
 
     def close_self(self):
-        self.close()
+        sys.exit()
             
     def set_qss(self):
         #B0E0E6
