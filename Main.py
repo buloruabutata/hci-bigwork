@@ -80,7 +80,7 @@ class App(QMainWindow):
  
     def main_UI(self):
         # 设置窗口大小
-        self.setFixedSize(1920, 1000)
+        self.setFixedSize(QApplication.desktop().width(), QApplication.desktop().height() - 80)
         # 设置窗口名称
         self.setWindowTitle("基于手势识别的多媒体辅助控制系统")
         # 设置窗口的图片
@@ -91,11 +91,11 @@ class App(QMainWindow):
         self.main_layout = QGridLayout()
         # 创建一个9*16的网格布局
         for i in range(18):
-            self.main_layout.setRowMinimumHeight(i, 100)
+            self.main_layout.setRowMinimumHeight(i, int(QApplication.desktop().height() / 18))
             for j in range(32):
                 self.main_layout.addWidget(QLabel(f""), i, j) # 不显示坐标，只添加空的QLabel
                 if i == 0:
-                    self.main_layout.setColumnMinimumWidth(j, 100)
+                    self.main_layout.setColumnMinimumWidth(j, int(QApplication.desktop().width() / 32))
         # 将窗口加入布局
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件

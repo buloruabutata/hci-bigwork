@@ -135,7 +135,7 @@ class PdfWindow(QMainWindow):
     def main_UI(self):
         self.full = False
         # 设置窗口大小
-        self.setFixedSize(1920, 1000)
+        self.setFixedSize(QApplication.desktop().width(), QApplication.desktop().height() - 80)
         # 设置窗口名称
         self.setWindowTitle("基于手势识别的多媒体辅助控制系统")
         # 设置窗口的图片
@@ -146,11 +146,11 @@ class PdfWindow(QMainWindow):
         self.main_layout = QGridLayout()
         # 创建一个9*16的网格布局(用于定位，后期会删除)
         for i in range(18):
-            self.main_layout.setRowMinimumHeight(i, 100)
+            self.main_layout.setRowMinimumHeight(i, int(QApplication.desktop().height() / 18))
             for j in range(32):
                 self.main_layout.addWidget(QLabel(f""), i, j) # 不显示坐标，只添加空的QLabel
                 if i == 0:
-                    self.main_layout.setColumnMinimumWidth(j, 100)
+                    self.main_layout.setColumnMinimumWidth(j, int(QApplication.desktop().width() / 32))
         # 将窗口加入布局
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
@@ -231,8 +231,8 @@ class PdfWindow(QMainWindow):
         self.metadata = self.doc.metadata
         self.current_page = 0
         self.zoom = 1
-        self.xpdf = 1400
-        self.ypdf = 860
+        self.xpdf = int(QApplication.desktop().width() * 5 / 6)
+        self.ypdf = int(QApplication.desktop().height() * 3 / 4 - 80)
         self.keep = True
         self.renderPage()
     
@@ -272,7 +272,8 @@ class PdfWindow(QMainWindow):
 
         self.label = QLabel(self)
         self.label.setPixmap(pixmap)
-        self.label.setFixedSize(self.xpdf, self.ypdf)
+        if self.full:
+            self.label.setFixedSize(self.xpdf, self.ypdf)
         self.label.setAlignment(Qt.AlignCenter)
         if self.full:
             self.main_layout.addWidget(self.label, 0, 0, 18, 32)
@@ -315,8 +316,8 @@ class PdfWindow(QMainWindow):
             
     def full_self(self):
         self.full = True
-        self.xpdf = 1920
-        self.ypdf = 1000
+        self.xpdf = QApplication.desktop().width()
+        self.ypdf = QApplication.desktop().height() - 80
         self.set_btn_visible(False)
         self.main_layout.addWidget(self.camera_label, 15, 28, 3, 4)
         self.clearLayout()
@@ -324,8 +325,8 @@ class PdfWindow(QMainWindow):
     
     def no_full_self(self):
         self.full = False
-        self.xpdf = 1400
-        self.ypdf = 860
+        self.xpdf = int(QApplication.desktop().width() * 5 / 6)
+        self.ypdf = int(QApplication.desktop().height() * 3 / 4 - 80)
         self.set_btn_visible(True)
         self.main_layout.addWidget(self.camera_label, 12, 24, 6, 8)
         self.clearLayout()
