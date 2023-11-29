@@ -167,7 +167,7 @@ class PdfWindow(QMainWindow):
         self.main_layout.addWidget(self.exit_btn, 0, 30, 4, 4)
         self.main_layout.addWidget(self.status_label, 5, 27, 8, 8)
         # 链接到方法
-        self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
+        self.help_btn.clicked.connect(lambda: open_help("https://www.cnblogs.com/19373400weileng/p/17864459.html"))
         self.main_btn.clicked.connect(self.toMain)
         self.exit_btn.clicked.connect(self.close_self)
         

@@ -100,11 +100,11 @@ class App(QMainWindow):
         self.main_wight.setLayout(self.main_layout)
         # 将这个主窗口设置成窗口主部件
         self.setCentralWidget(self.main_wight)
-        self.title = QLabel("请选择需要展示的媒体类型")
+        self.title = QLabel("请选择展示的媒体文件")
         self.title.setFont(QFont("微软雅黑", 25, QFont.Bold))
         # self.title.setStyleSheet("color: red")
         self.title.setAlignment(Qt.AlignCenter)
-        self.main_layout.addWidget(self.title, 0, 12, 4, 8)
+        self.main_layout.addWidget(self.title, 0, 12, 4, 7)
         
         self.set_qss()
         
@@ -117,7 +117,7 @@ class App(QMainWindow):
         
         self.help_btn = new_button('./images/help.svg', 100, 100, '帮助')
         self.exit_btn = new_button('./images/exit.svg', 100, 100, '退出')
-        self.help_btn.clicked.connect(lambda: open_help("https://www.bing.com"))
+        self.help_btn.clicked.connect(lambda: open_help("https://www.cnblogs.com/19373400weileng/p/17864459.html"))
         self.exit_btn.clicked.connect(self.close_self)
         
         # 将按钮加入布局
